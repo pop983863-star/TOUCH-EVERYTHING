@@ -110,34 +110,33 @@ function App() {
 
   const renderHome = () => (
     <div className="page-home">
-      <div className="viewport">
-        <div className="main-grid-wrapper">
-          <div className={`layer-static ${mode === 'static' ? 'is-active' : ''}`}>
-            <img src="/assets/initial-grid.png" alt="Static Grid" className="pixel-perfect" />
-          </div>
-          <div className={`layer-dynamic ${mode !== 'static' ? 'is-active' : ''}`}>
-            {nodes.map((node) => (
-              <div key={node.id} className="mask-circle"
-                style={{ 
-                  left: `${node.x}px`, top: `${node.y}px`,
-                  backgroundImage: `url(${currentBgImage})`,
-                  backgroundPosition: `-${node.x}px -${node.y}px`,
-                  backgroundSize: '496px 396px' 
-                }}
-              />
-            ))}
-            {activeIndices.map((idx, i) => (
-              <div key={`marker-${i}`} 
-                className="logo-overlay-marker clickable-logo"
-                style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}
-                onClick={() => setView('about')}
-              >
-                <img src="/assets/logo-reference.png" alt="Logo" />
-              </div>
-            ))}
-          </div>
+      <div className="main-grid-wrapper">
+        <div className={`layer-static ${mode === 'static' ? 'is-active' : ''}`}>
+          <img src="/assets/initial-grid.png" alt="Static Grid" className="pixel-perfect" />
+        </div>
+        <div className={`layer-dynamic ${mode !== 'static' ? 'is-active' : ''}`}>
+          {nodes.map((node) => (
+            <div key={node.id} className="mask-circle"
+              style={{ 
+                left: `${node.x}px`, top: `${node.y}px`,
+                backgroundImage: `url(${currentBgImage})`,
+                backgroundPosition: `-${node.x}px -${node.y}px`,
+                backgroundSize: '496px 396px' 
+              }}
+            />
+          ))}
+          {activeIndices.map((idx, i) => (
+            <div key={`marker-${i}`} 
+              className="logo-overlay-marker clickable-logo"
+              style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}
+              onClick={() => setView('about')}
+            >
+              <img src="/assets/logo-reference.png" alt="Logo" />
+            </div>
+          ))}
         </div>
       </div>
+      
       <footer className="footer">
         <form onSubmit={(e) => { e.preventDefault(); fetchNewImage(inputText); }}>
           <input value={inputText} onChange={(e) => handleHomeInteraction(e.target.value)} placeholder="TYPE TO START INTERACTION" />
