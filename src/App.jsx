@@ -69,7 +69,7 @@ function App() {
         } else if (mode === 'static' && diff >= 20 && diff < 50) {
           if (mode !== 'slideshow') {
             setMode('slideshow');
-            fetchNewImage('minimal');
+            fetchNewImage('nature');
           }
         } else if (mode === 'slideshow' && diff >= 50) {
           setMode('static');
@@ -102,7 +102,7 @@ function App() {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => {
         moveLogos();
-        fetchNewImage(inputText || 'art');
+        fetchNewImage(inputText || 'minimal');
       }, 5000);
       return () => clearInterval(interval);
     }
@@ -144,7 +144,7 @@ function App() {
           <input 
             value={inputText} 
             onChange={(e) => handleHomeInteraction(e.target.value)} 
-            placeholder="TYPE TO SEARCH" 
+            placeholder="TYPE TO START" 
           />
         </form>
       </footer>
@@ -163,7 +163,7 @@ function App() {
         <p className="sub-desc">{description}</p>
       </div>
       <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}>
-        <img src="/assets/logo-reference.png" alt="Back to Home" />
+        <img src="/assets/logo-reference.png" alt="Home" />
       </div>
     </div>
   );
