@@ -26,15 +26,15 @@ function App() {
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
   
-  const lastActivity = useRef(Date.now());
-  const lastInteraction = useRef(Date.now()); // 인트로 시퀀스용
+  const lastInteractionTime = useRef(Date.now()); // 인트로 시퀀스용
+  const subPageActivityTime = useRef(Date.now()); // 3분 자동복귀용
 
-  // --- 이미지 fetch 로직 ---
-  const fetchNewImage = async (query = 'minimal') => {
+  // --- 이미지 fetch 로직 (기존 유지) ---
+  const fetchNewImage = async (query = 'abstract') => {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}`);
       const data = await res.json();
-      if (data.images?.length > 0) {
+      if (data.images && data.images.length > 0) {
         setCurrentBgImage(data.images[Math.floor(Math.random() * data.images.length)]);
       }
     } catch (e) {
@@ -42,11 +42,10 @@ function App() {
     }
   };
 
-  // --- 인터랙션 핸들러 ---
+  // --- 홈 인터랙션 핸들러 (기존 유지) ---
   const handleHomeInteraction = (val) => {
     setInputText(val);
-    lastInteraction.current = Date.now();
-    lastActivity.current = Date.now();
+    lastInteractionTime.current = Date.now();
     if (mode === 'static' && val.trim() !== '') {
       setMode('interactive');
       fetchNewImage(val);
@@ -62,21 +61,21 @@ function App() {
     });
   }, []);
 
-  // --- 타이머 & 시퀀스 로직 ---
+  // --- 통합 타이머 로직 ---
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
-      
-      // 1. [홈 전용] 인트로 시퀀스 (10초/30초)
+
+      // 1. 홈 화면 시퀀스 (10초/30초 기존 로직 유지)
       if (view === 'home') {
-        const diff = (now - lastInteraction.current) / 1000;
+        const diff = (now - lastInteractionTime.current) / 1000;
         if (mode === 'interactive' && diff >= 10) {
           setMode('static');
           setActiveIndices(INITIAL_LOGO_INDICES);
         } else if (mode === 'static' && diff >= 20 && diff < 50) {
           if (mode !== 'slideshow') {
             setMode('slideshow');
-            fetchNewImage('nature');
+            fetchNewImage('minimal');
           }
         } else if (mode === 'slideshow' && diff >= 50) {
           setMode('static');
@@ -84,44 +83,52 @@ function App() {
         }
       }
 
-      // 2. [서브페이지 전용] 3분(180초) 무반응 시 홈으로 복귀
+      // 2. 서브페이지 3분 무반응 복귀 (180초)
       if (view !== 'home') {
-        const inactiveTime = (now - lastActivity.current) / 1000;
-        if (inactiveTime >= 180) {
+        const inactiveDiff = (now - subPageActivityTime.current) / 1000;
+        if (inactiveDiff >= 180) {
           setView('home');
           setMode('static');
+          setActiveIndices(INITIAL_LOGO_INDICES);
         }
       }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view]);
 
-  // 홈이 아닐 때 마우스 움직임 감지하여 타이머 리셋
+  // 서브페이지 활동 감지
   useEffect(() => {
-    const resetTimer = () => { lastActivity.current = Date.now(); };
-    window.addEventListener('mousemove', resetTimer);
-    return () => window.removeEventListener('mousemove', resetTimer);
+    const handleGlobalMove = () => { subPageActivityTime.current = Date.now(); };
+    window.addEventListener('mousemove', handleGlobalMove);
+    window.addEventListener('keydown', handleGlobalMove);
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMove);
+      window.removeEventListener('keydown', handleGlobalMove);
+    };
   }, []);
 
+  // 로고 이동 타이머
   useEffect(() => {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => {
         moveLogos();
-        fetchNewImage(inputText || 'minimal');
+        fetchNewImage(inputText || 'art');
       }, 5000);
       return () => clearInterval(interval);
     }
   }, [mode, view, moveLogos, inputText]);
 
-  // --- 렌더링 함수 ---
+  // --- 렌더링 파트 ---
+  
+  // 1번 페이지: 홈/인트로 (기존 코드 그대로 유지)
   const renderHome = () => (
-    <div className="home-screen">
+    <div className="page-home">
       <main className="viewport">
         <div className="main-grid-wrapper">
-          <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}>
+          <div className={`layer-static ${mode === 'static' ? 'is-active' : ''}`}>
             <img src="/assets/initial-grid.png" alt="Static Grid" className="pixel-perfect" />
           </div>
-          <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
+          <div className={`layer-dynamic ${mode !== 'static' ? 'is-active' : ''}`}>
             {nodes.map((node) => (
               <div key={node.id} className="mask-circle"
                 style={{ 
@@ -133,9 +140,10 @@ function App() {
               />
             ))}
             {activeIndices.map((idx, i) => (
-              <div key={`marker-${i}`} className="moving-logo-marker clickable"
+              <div key={`marker-${i}`} 
+                className="logo-overlay-marker clickable-logo"
                 style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}
-                onClick={() => setView('about')} // 로고 클릭 시 About 페이지로 이동
+                onClick={() => setView('about')} // 로고 클릭 시 이동
               >
                 <img src="/assets/logo-reference.png" alt="Logo" />
               </div>
@@ -151,29 +159,32 @@ function App() {
     </div>
   );
 
-  const renderSubPage = (title, content) => (
-    <div className="sub-page">
-      <nav className="sub-nav">
-        <button className={view === 'about' ? 'active' : ''} onClick={() => setView('about')}>ABOUT</button>
-        <button className={view === 'identity' ? 'active' : ''} onClick={() => setView('identity')}>IDENTITY</button>
-        <button className={view === 'objects' ? 'active' : ''} onClick={() => setView('objects')}>OBJECTS</button>
+  // 서브 페이지 공통 레이아웃 (목차 상단, 홈 버튼 우측 하단)
+  const renderSubPage = (title, description) => (
+    <div className="page-sub">
+      <nav className="top-nav">
+        <button className={view === 'about' ? 'on' : ''} onClick={() => setView('about')}>ABOUT</button>
+        <button className={view === 'identity' ? 'on' : ''} onClick={() => setView('identity')}>IDENTITY</button>
+        <button className={view === 'objects' ? 'on' : ''} onClick={() => setView('objects')}>OBJECTS</button>
       </nav>
-      <div className="sub-content-container">
-        <h1>{title}</h1>
-        <p>{content}</p>
+      
+      <div className="content-area">
+        <h1 className="sub-title">{title}</h1>
+        <p className="sub-desc">{description}</p>
       </div>
-      <div className="home-return-btn" onClick={() => { setView('home'); setMode('static'); }}>
-        <img src="/assets/logo-reference.png" alt="Home" />
+
+      <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}>
+        <img src="/assets/logo-reference.png" alt="Back to Home" />
       </div>
     </div>
   );
 
   return (
-    <div className="app-root">
+    <div className="app-container">
       {view === 'home' && renderHome()}
-      {view === 'about' && renderSubPage('ABOUT', 'Brand introduction and vision summary.')}
-      {view === 'identity' && renderSubPage('IDENTITY', 'Design system, color palette, and grid guidelines.')}
-      {view === 'objects' && renderSubPage('OBJECTS', 'Physical outcomes and visual explorations.')}
+      {view === 'about' && renderSubPage('ABOUT', 'Experimental Motion Identity Project Overview.')}
+      {view === 'identity' && renderSubPage('IDENTITY', 'A 3-4-3-4-3 Grid System and Brand Guidelines.')}
+      {view === 'objects' && renderSubPage('OBJECTS', 'Visualized outcome and physical applications.')}
     </div>
   );
 }
