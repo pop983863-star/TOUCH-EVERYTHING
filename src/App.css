@@ -1,63 +1,131 @@
-/* 기존 스타일 유지하면서 아래 내용 추가 */
-
 :root {
-  --circle-size: 96px;
-  --grid-width: 496px;
-  --grid-height: 396px;
-  --menu-font: 12px;
+  --node-size: 96px;
+  --grid-w: 496px;
+  --grid-h: 396px;
 }
 
+body {
+  margin: 0;
+  background-color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+/* 기존 그리드 레이아웃 스타일 (절대 삭제 금지) */
+.main-grid-wrapper {
+  position: relative;
+  width: var(--grid-w);
+  height: var(--grid-h);
+}
+
+.layer-static, .layer-dynamic {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.is-active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 10;
+}
+
+.pixel-perfect {
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* 초기 이미지 크기 차이 해결 로직 유지 */
+  display: block;
+}
+
+.mask-circle {
+  position: absolute;
+  width: var(--node-size);
+  height: var(--node-size);
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-size: var(--grid-w) var(--grid-h);
+  transition: background-image 1.2s ease-in-out;
+}
+
+.logo-overlay-marker {
+  position: absolute;
+  width: var(--node-size);
+  height: var(--node-size);
+  z-index: 20;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-overlay-marker img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transform: scale(1.02);
+  display: block;
+}
+
+/* --- 새로 추가된 스타일 --- */
+
 /* 서브페이지 네비게이션 (중앙 상단) */
-.sub-nav {
+.top-nav {
   position: fixed;
-  top: 50px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 40px;
+  gap: 50px;
   z-index: 100;
 }
 
-.sub-nav button {
+.top-nav button {
   background: none;
   border: none;
-  font-size: var(--menu-font);
-  font-weight: 700;
-  letter-spacing: 0.2em;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
   cursor: pointer;
-  color: #ccc;
-  transition: color 0.3s ease;
+  color: #d1d1d1;
+  transition: color 0.4s ease;
 }
 
-.sub-nav button.active, .sub-nav button:hover {
+.top-nav button.on, .top-nav button:hover {
   color: #000;
 }
 
-/* 서브페이지 본문 컨테이너 */
-.sub-page {
+/* 서브페이지 본문 */
+.page-sub {
   width: 100vw;
   height: 100vh;
-  background: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 1s ease;
+  animation: pageFadeIn 1s ease;
 }
 
-.sub-content-container {
-  text-align: center;
-  max-width: 600px;
-}
-
-.sub-content-container h1 {
-  font-size: 40px;
+.sub-title {
+  font-size: 48px;
   font-weight: 900;
-  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px 0;
 }
 
-/* 홈 복귀 로고 (우측 하단 50px) */
-.home-return-btn {
+.sub-desc {
+  font-size: 14px;
+  color: #666;
+  max-width: 400px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* 홈 복귀 버튼 (우측 하단 50px) */
+.home-back-btn {
   position: fixed;
   right: 40px;
   bottom: 40px;
@@ -68,25 +136,21 @@
   transition: transform 0.3s ease;
 }
 
-.home-return-btn:hover {
-  transform: scale(1.1);
-}
-
-.home-return-btn img {
-  width: 100%;
-  height: 100%;
+.home-back-btn:hover { transform: scale(1.15); }
+.home-back-btn img {
+  width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* 로고 클릭 가능하도록 커서 변경 */
-.clickable {
-  cursor: pointer !important;
-}
+/* 인트로 로고 클릭 가능 커서 */
+.clickable-logo { cursor: pointer !important; }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+.footer { padding-bottom: 80px; display: flex; justify-content: center; }
+form { border-bottom: 1px solid #111; padding: 8px 0; width: 300px; }
+input { border: none; outline: none; width: 100%; font-size: 14px; text-transform: uppercase; text-align: center; background: transparent; letter-spacing: 0.15em; }
 
-/* 기타 기존 App.css의 .viewport, .grid-system 등 레이아웃 스타일을 그대로 유지하세요 */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
