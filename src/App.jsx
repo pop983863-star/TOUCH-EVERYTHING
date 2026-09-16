@@ -18,18 +18,16 @@ const generateGridNodes = () => {
 };
 
 function App() {
-  // --- 상태 관리 ---
-  const [view, setView] = useState('home'); // 'home', 'about', 'identity', 'objects'
+  const [view, setView] = useState('home'); 
   const [inputText, setInputText] = useState('');
   const [nodes] = useState(generateGridNodes());
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
   
-  const lastInteractionTime = useRef(Date.now()); // 인트로 시퀀스용
-  const subPageActivityTime = useRef(Date.now()); // 3분 자동복귀용
+  const lastInteractionTime = useRef(Date.now()); 
+  const subPageActivityTime = useRef(Date.now()); 
 
-  // --- 이미지 fetch 로직 (기존 유지) ---
   const fetchNewImage = async (query = 'abstract') => {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}`);
@@ -42,7 +40,6 @@ function App() {
     }
   };
 
-  // --- 홈 인터랙션 핸들러 (기존 유지) ---
   const handleHomeInteraction = (val) => {
     setInputText(val);
     lastInteractionTime.current = Date.now();
@@ -61,12 +58,9 @@ function App() {
     });
   }, []);
 
-  // --- 통합 타이머 로직 ---
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
-
-      // 1. 홈 화면 시퀀스 (10초/30초 기존 로직 유지)
       if (view === 'home') {
         const diff = (now - lastInteractionTime.current) / 1000;
         if (mode === 'interactive' && diff >= 10) {
@@ -82,8 +76,6 @@ function App() {
           setActiveIndices(INITIAL_LOGO_INDICES);
         }
       }
-
-      // 2. 서브페이지 3분 무반응 복귀 (180초)
       if (view !== 'home') {
         const inactiveDiff = (now - subPageActivityTime.current) / 1000;
         if (inactiveDiff >= 180) {
@@ -96,7 +88,6 @@ function App() {
     return () => clearInterval(timer);
   }, [mode, view]);
 
-  // 서브페이지 활동 감지
   useEffect(() => {
     const handleGlobalMove = () => { subPageActivityTime.current = Date.now(); };
     window.addEventListener('mousemove', handleGlobalMove);
@@ -107,7 +98,6 @@ function App() {
     };
   }, []);
 
-  // 로고 이동 타이머
   useEffect(() => {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => {
@@ -118,12 +108,9 @@ function App() {
     }
   }, [mode, view, moveLogos, inputText]);
 
-  // --- 렌더링 파트 ---
-  
-  // 1번 페이지: 홈/인트로 (기존 코드 그대로 유지)
   const renderHome = () => (
     <div className="page-home">
-      <main className="viewport">
+      <div className="viewport">
         <div className="main-grid-wrapper">
           <div className={`layer-static ${mode === 'static' ? 'is-active' : ''}`}>
             <img src="/assets/initial-grid.png" alt="Static Grid" className="pixel-perfect" />
@@ -143,14 +130,14 @@ function App() {
               <div key={`marker-${i}`} 
                 className="logo-overlay-marker clickable-logo"
                 style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}
-                onClick={() => setView('about')} // 로고 클릭 시 이동
+                onClick={() => setView('about')}
               >
                 <img src="/assets/logo-reference.png" alt="Logo" />
               </div>
             ))}
           </div>
         </div>
-      </main>
+      </div>
       <footer className="footer">
         <form onSubmit={(e) => { e.preventDefault(); fetchNewImage(inputText); }}>
           <input value={inputText} onChange={(e) => handleHomeInteraction(e.target.value)} placeholder="TYPE TO START INTERACTION" />
@@ -159,7 +146,6 @@ function App() {
     </div>
   );
 
-  // 서브 페이지 공통 레이아웃 (목차 상단, 홈 버튼 우측 하단)
   const renderSubPage = (title, description) => (
     <div className="page-sub">
       <nav className="top-nav">
@@ -167,12 +153,10 @@ function App() {
         <button className={view === 'identity' ? 'on' : ''} onClick={() => setView('identity')}>IDENTITY</button>
         <button className={view === 'objects' ? 'on' : ''} onClick={() => setView('objects')}>OBJECTS</button>
       </nav>
-      
       <div className="content-area">
         <h1 className="sub-title">{title}</h1>
         <p className="sub-desc">{description}</p>
       </div>
-
       <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}>
         <img src="/assets/logo-reference.png" alt="Back to Home" />
       </div>
@@ -180,7 +164,7 @@ function App() {
   );
 
   return (
-    <div className="app-container">
+    <div className="app-root-container">
       {view === 'home' && renderHome()}
       {view === 'about' && renderSubPage('ABOUT', 'Experimental Motion Identity Project Overview.')}
       {view === 'identity' && renderSubPage('IDENTITY', 'A 3-4-3-4-3 Grid System and Brand Guidelines.')}
