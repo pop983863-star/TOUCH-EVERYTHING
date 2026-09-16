@@ -11,43 +11,37 @@ body {
   overflow: hidden;
 }
 
+/* 최상위 컨테이너: 화면 전체 꽉 채움 */
 .app-root-container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
   position: relative;
 }
 
-/* 홈 화면 레이아웃 */
+/* 홈 페이지 레이아웃: 그리드(중앙)와 푸터(하단)를 수직 정렬 */
 .page-home {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center; /* 전체 요소를 중앙으로 모으되 뷰포트로 세밀 조정 */
 }
 
-/* 그리드 시스템 영역: 수직 중앙보다 살짝 위(약 10%)로 올려 에디토리얼 비율 구현 */
+/* 그리드가 들어가는 뷰포트: 화면 중앙을 차지 */
 .viewport {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding-bottom: 10vh; /* 하단 푸터와의 여백 확보를 위해 아래쪽 패딩 추가 */
 }
 
+/* 17개 원 그리드 래퍼 */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
   height: var(--grid-h);
-  z-index: 10;
 }
 
-/* 기존 마스킹 및 로고 효과 유지 */
 .layer-static, .layer-dynamic {
   position: absolute;
   top: 0; left: 0;
@@ -57,11 +51,15 @@ body {
   pointer-events: none;
 }
 
-.is-active { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
+.is-active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 10;
+}
 
 .pixel-perfect {
   width: 100%; height: 100%;
-  object-fit: fill;
+  object-fit: fill; /* 초기 이미지 크기 정밀 매칭 */
   display: block;
 }
 
@@ -90,60 +88,51 @@ body {
   width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transform: scale(1.02);
+  transform: scale(1.02); /* 마스킹 원을 완벽히 덮음 */
 }
 
-/* 푸터 레이아웃: 이미지의 비율처럼 바닥에 아주 가깝게 배치 */
+/* 푸터 레이아웃: 이미지처럼 화면 맨 아래에 배치 */
 .footer-layout {
-  position: absolute;
-  bottom: 60px; /* 바닥과의 간격 */
-  width: 100%;
+  height: 120px; /* 푸터의 공간 확보 */
   display: flex;
   justify-content: center;
-  z-index: 50;
+  align-items: flex-start;
 }
 
-/* 입력창 폼: 이미지 속 라인 길이 반영 (약 400px~500px) */
+/* 입력창 폼: 가늘고 정교한 선과 텍스트 */
 .footer-form {
-  border-bottom: 0.5px solid #111; /* 아주 얇은 실선 */
-  padding: 4px 0;
-  width: 480px; /* 이미지 속의 라인 비율에 맞춤 */
+  border-bottom: 0.5px solid #111;
+  padding: 5px 0;
+  width: 320px; /* 이미지 속 라인 길이 반영 */
 }
 
 input {
   border: none;
   outline: none;
   width: 100%;
-  font-size: 10px; /* 아주 작은 캡션 폰트 크기 */
+  font-size: 9px; /* 아주 작은 폰트 크기 */
   font-weight: 400;
   text-transform: uppercase;
   text-align: center;
   background: transparent;
-  letter-spacing: 0.25em; /* 자간을 넓게 주어 세련된 느낌 부여 */
+  letter-spacing: 0.2em; /* 폰트 자간 넓게 */
   color: #111;
-}
-
-input::placeholder {
-  color: #999;
 }
 
 /* --- 서브페이지 스타일 (기존 유지) --- */
 .page-sub {
   position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: #fff; z-index: 100; animation: pageFadeIn 1s ease;
+  background: #fff; z-index: 100; animation: fadeIn 1s ease;
 }
 
 .top-nav { position: absolute; top: 60px; display: flex; gap: 50px; }
 .top-nav button { background: none; border: none; font-size: 11px; font-weight: 800; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
 .top-nav button.on, .top-nav button:hover { color: #000; }
-.sub-title { font-size: 48px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 20px; }
-.sub-desc { font-size: 14px; color: #666; max-width: 400px; line-height: 1.6; text-align: center; }
+.sub-title { font-size: 48px; font-weight: 900; margin-bottom: 20px; }
+.sub-desc { font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; }
 .home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 .clickable-logo { cursor: pointer !important; }
 
-@keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
