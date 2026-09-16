@@ -11,7 +11,33 @@ body {
   overflow: hidden;
 }
 
-/* 기존 그리드 레이아웃 스타일 (절대 삭제 금지) */
+/* 최상위 컨테이너 정렬 */
+.app-root-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 홈 화면 레이아웃 - 중앙 정렬 보장 */
+.page-home {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewport {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 그리드 시스템을 가로중앙에 */
+  width: 100%;
+}
+
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
@@ -34,9 +60,8 @@ body {
 }
 
 .pixel-perfect {
-  width: 100%;
-  height: 100%;
-  object-fit: fill; /* 초기 이미지 크기 차이 해결 로직 유지 */
+  width: 100%; height: 100%;
+  object-fit: fill;
   display: block;
 }
 
@@ -62,43 +87,14 @@ body {
 }
 
 .logo-overlay-marker img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
   transform: scale(1.02);
   display: block;
 }
 
-/* --- 새로 추가된 스타일 --- */
-
-/* 서브페이지 네비게이션 (중앙 상단) */
-.top-nav {
-  position: fixed;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 50px;
-  z-index: 100;
-}
-
-.top-nav button {
-  background: none;
-  border: none;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.25em;
-  cursor: pointer;
-  color: #d1d1d1;
-  transition: color 0.4s ease;
-}
-
-.top-nav button.on, .top-nav button:hover {
-  color: #000;
-}
-
-/* 서브페이지 본문 */
+/* --- 서브페이지 스타일 --- */
 .page-sub {
   width: 100vw;
   height: 100vh;
@@ -106,47 +102,35 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background: #fff;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 50;
   animation: pageFadeIn 1s ease;
 }
 
-.sub-title {
-  font-size: 48px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  margin: 0 0 20px 0;
-}
-
-.sub-desc {
-  font-size: 14px;
-  color: #666;
-  max-width: 400px;
-  line-height: 1.6;
-  text-align: center;
-}
-
-/* 홈 복귀 버튼 (우측 하단 50px) */
-.home-back-btn {
+.top-nav {
   position: fixed;
-  right: 40px;
-  bottom: 40px;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-  z-index: 100;
-  transition: transform 0.3s ease;
+  top: 60px;
+  display: flex;
+  gap: 50px;
 }
 
-.home-back-btn:hover { transform: scale(1.15); }
-.home-back-btn img {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
+.top-nav button {
+  background: none; border: none; font-size: 11px; font-weight: 800; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease;
 }
 
-/* 인트로 로고 클릭 가능 커서 */
-.clickable-logo { cursor: pointer !important; }
+.top-nav button.on, .top-nav button:hover { color: #000; }
 
-.footer { padding-bottom: 80px; display: flex; justify-content: center; }
+.sub-title { font-size: 48px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 20px; }
+.sub-desc { font-size: 14px; color: #666; max-width: 400px; line-height: 1.6; text-align: center; }
+
+.home-back-btn {
+  position: fixed; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; transition: transform 0.3s ease;
+}
+.home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+.footer { padding-bottom: 80px; display: flex; justify-content: center; width: 100%; }
 form { border-bottom: 1px solid #111; padding: 8px 0; width: 300px; }
 input { border: none; outline: none; width: 100%; font-size: 14px; text-transform: uppercase; text-align: center; background: transparent; letter-spacing: 0.15em; }
 
