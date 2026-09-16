@@ -1,104 +1,92 @@
+/* 기존 스타일 유지하면서 아래 내용 추가 */
+
 :root {
   --circle-size: 96px;
   --grid-width: 496px;
   --grid-height: 396px;
+  --menu-font: 12px;
 }
 
-body {
-  margin: 0;
-  background-color: #ffffff;
-  font-family: sans-serif;
-  overflow: hidden;
+/* 서브페이지 네비게이션 (중앙 상단) */
+.sub-nav {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 40px;
+  z-index: 100;
 }
 
-.brand-container {
+.sub-nav button {
+  background: none;
+  border: none;
+  font-size: var(--menu-font);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  color: #ccc;
+  transition: color 0.3s ease;
+}
+
+.sub-nav button.active, .sub-nav button:hover {
+  color: #000;
+}
+
+/* 서브페이지 본문 컨테이너 */
+.sub-page {
   width: 100vw;
   height: 100vh;
+  background: #fff;
   display: flex;
   flex-direction: column;
-}
-
-.viewport {
-  flex: 1;
-  display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 1s ease;
 }
 
-.main-grid-wrapper {
-  position: relative;
-  width: var(--grid-width);
-  height: var(--grid-height);
+.sub-content-container {
+  text-align: center;
+  max-width: 600px;
 }
 
-.layer-static, .layer-dynamic {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  opacity: 0;
-  transition: opacity 1.2s ease-in-out;
-  pointer-events: none;
+.sub-content-container h1 {
+  font-size: 40px;
+  font-weight: 900;
+  margin-bottom: 20px;
 }
 
-.on {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  z-index: 10;
+/* 홈 복귀 로고 (우측 하단 50px) */
+.home-return-btn {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  z-index: 100;
+  transition: transform 0.3s ease;
 }
 
-.layer-static img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.home-return-btn:hover {
+  transform: scale(1.1);
 }
 
-.mask-circle {
-  position: absolute;
-  width: var(--circle-size);
-  height: var(--circle-size);
-  border-radius: 50%;
-  background-repeat: no-repeat;
-  background-size: var(--grid-width) var(--grid-height);
-}
-
-.moving-logo-marker {
-  position: absolute;
-  width: var(--circle-size);
-  height: var(--circle-size);
-  z-index: 20;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.moving-logo-marker img {
+.home-return-btn img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transform: scale(1.02);
-  display: block;
 }
 
-.footer {
-  padding-bottom: 80px;
-  display: flex;
-  justify-content: center;
+/* 로고 클릭 가능하도록 커서 변경 */
+.clickable {
+  cursor: pointer !important;
 }
 
-form {
-  border-bottom: 1px solid #000;
-  padding: 8px 0;
-  width: 300px;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-input {
-  border: none; outline: none;
-  width: 100%;
-  font-size: 14px;
-  text-transform: uppercase;
-  text-align: center;
-  background: transparent;
-  letter-spacing: 0.1em;
-}
+/* 기타 기존 App.css의 .viewport, .grid-system 등 레이아웃 스타일을 그대로 유지하세요 */
