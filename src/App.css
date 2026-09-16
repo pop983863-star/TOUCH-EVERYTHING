@@ -1,44 +1,22 @@
-/* 1. 최상단에 IBM Plex Sans 폰트 임포트 (400, 700 두 가지 굵기) */
+/* 1. IBM Plex Sans 폰트 임포트 (400-레귤러, 700-볼드) */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap');
+
+:root {
+  --node-size: 96px;
+  --grid-w: 496px;
+  --grid-h: 396px;
+}
 
 /* 2. 전체 기본 폰트 설정 (Regular) */
 body {
   margin: 0;
   background-color: #ffffff;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400; /* 기본은 레귤러 */
+  font-weight: 400;
   overflow: hidden;
 }
 
-/* 3. 제목(서브페이지 큰 글씨)만 Bold 적용 */
-.sub-title {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 700; /* 제목은 볼드 */
-  font-size: 48px;
-  letter-spacing: -0.02em;
-  margin-bottom: 20px;
-}
-
-/* 4. 상단 메뉴 버튼 Bold 적용 (디자인 강조를 위해 보통 메뉴도 볼드를 씁니다) */
-.top-nav button {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 700; /* 메뉴 제목도 볼드 */
-  background: none;
-  border: none;
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  cursor: pointer;
-  color: #d1d1d1;
-  transition: color 0.4s ease;
-}
-
-/* 5. 입력창 및 설명글은 Regular 유지 */
-input, .sub-desc {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400; /* 나머지는 레귤러 */
-}
-
-/* 최상위 컨테이너: 화면 전체 꽉 채움 */
+/* 최상위 컨테이너 */
 .app-root-container {
   width: 100vw;
   height: 100vh;
@@ -69,16 +47,18 @@ input, .sub-desc {
   height: var(--grid-h);
 }
 
+/* 레이어 공통 스타일 (기본적으로 숨김 처리) */
 .layer-static, .layer-dynamic {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  opacity: 0;
+  opacity: 0; /* 이 부분이 0이라 안 보였을 수 있습니다 */
   transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
-.is-active {
+/* 3. 레이어 활성화 (on과 is-active 둘 다 지원하도록 보정) */
+.is-active, .on {
   opacity: 1 !important;
   pointer-events: auto !important;
   z-index: 10;
@@ -86,7 +66,7 @@ input, .sub-desc {
 
 .pixel-perfect {
   width: 100%; height: 100%;
-  object-fit: fill; /* 초기 이미지 크기 정밀 매칭 */
+  object-fit: fill; 
   display: block;
 }
 
@@ -115,49 +95,69 @@ input, .sub-desc {
   width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transform: scale(1.02); /* 마스킹 원을 완벽히 덮음 */
+  transform: scale(1.02); 
 }
 
-/* 푸터 레이아웃: 이미지처럼 화면 맨 아래에 배치 */
+/* 푸터 레이아웃 */
 .footer-layout {
-  height: 120px; /* 푸터의 공간 확보 */
+  height: 120px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
-/* 입력창 폼: 가늘고 정교한 선과 텍스트 */
 .footer-form {
   border-bottom: 0.5px solid #111;
   padding: 5px 0;
-  width: 320px; /* 이미지 속 라인 길이 반영 */
+  width: 320px; 
 }
 
+/* 입력창 폰트 (Regular) */
 input {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
   border: none;
   outline: none;
   width: 100%;
-  font-size: 9px; /* 아주 작은 폰트 크기 */
-  font-weight: 400;
+  font-size: 9px;
   text-transform: uppercase;
   text-align: center;
   background: transparent;
-  letter-spacing: 0.2em; /* 폰트 자간 넓게 */
+  letter-spacing: 0.2em;
   color: #111;
 }
 
-/* --- 서브페이지 스타일 (기존 유지) --- */
+/* --- 서브페이지 스타일 --- */
 .page-sub {
   position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: #fff; z-index: 100; animation: fadeIn 1s ease;
 }
 
+/* 상단 메뉴 버튼 (Bold) */
 .top-nav { position: absolute; top: 60px; display: flex; gap: 50px; }
-.top-nav button { background: none; border: none; font-size: 11px; font-weight: 800; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
+.top-nav button { 
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700; /* 메뉴는 볼드 */
+  background: none; border: none; font-size: 11px; letter-spacing: 0.25em; 
+  cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; 
+}
 .top-nav button.on, .top-nav button:hover { color: #000; }
-.sub-title { font-size: 48px; font-weight: 900; margin-bottom: 20px; }
-.sub-desc { font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; }
+
+/* 제목 (Bold) */
+.sub-title { 
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700; /* 제목 볼드 */
+  font-size: 48px; letter-spacing: -0.02em; margin-bottom: 20px; 
+}
+
+/* 설명글 (Regular) */
+.sub-desc { 
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400; /* 설명글 레귤러 */
+  font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; 
+}
+
 .home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 .clickable-logo { cursor: pointer !important; }
