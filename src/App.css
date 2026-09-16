@@ -11,37 +11,32 @@ body {
   overflow: hidden;
 }
 
-/* 최상위 컨테이너 정렬 */
+/* 최상위 컨테이너: 화면 전체를 꽉 채우고 자식 요소를 중앙 정렬 */
 .app-root-container {
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
-/* 홈 화면 레이아웃 - 중앙 정렬 보장 */
+/* 홈 화면: 그리드를 정가운데 두기 위해 relative 설정 */
 .page-home {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-}
-
-.viewport {
-  flex: 1;
-  display: flex;
   align-items: center;
-  justify-content: center; /* 그리드 시스템을 가로중앙에 */
-  width: 100%;
+  position: relative;
 }
 
+/* 그리드 시스템: 브라우저 정중앙에 위치 */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
   height: var(--grid-h);
+  z-index: 10;
 }
 
 .layer-static, .layer-dynamic {
@@ -94,8 +89,39 @@ body {
   display: block;
 }
 
+/* 푸터: 그리드와 상관없이 하단에 고정 */
+.footer {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  z-index: 50;
+}
+
+form {
+  border-bottom: 1px solid #111;
+  padding: 8px 0;
+  width: 300px;
+}
+
+input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  text-transform: uppercase;
+  text-align: center;
+  background: transparent;
+  letter-spacing: 0.15em;
+}
+
 /* --- 서브페이지 스타일 --- */
 .page-sub {
+  position: fixed;
+  top: 0; left: 0;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -103,14 +129,12 @@ body {
   align-items: center;
   justify-content: center;
   background: #fff;
-  position: fixed;
-  top: 0; left: 0;
-  z-index: 50;
+  z-index: 100;
   animation: pageFadeIn 1s ease;
 }
 
 .top-nav {
-  position: fixed;
+  position: absolute;
   top: 60px;
   display: flex;
   gap: 50px;
@@ -126,13 +150,11 @@ body {
 .sub-desc { font-size: 14px; color: #666; max-width: 400px; line-height: 1.6; text-align: center; }
 
 .home-back-btn {
-  position: fixed; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; transition: transform 0.3s ease;
+  position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; transition: transform 0.3s ease;
 }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-.footer { padding-bottom: 80px; display: flex; justify-content: center; width: 100%; }
-form { border-bottom: 1px solid #111; padding: 8px 0; width: 300px; }
-input { border: none; outline: none; width: 100%; font-size: 14px; text-transform: uppercase; text-align: center; background: transparent; letter-spacing: 0.15em; }
+.clickable-logo { cursor: pointer !important; }
 
 @keyframes pageFadeIn {
   from { opacity: 0; transform: translateY(10px); }
