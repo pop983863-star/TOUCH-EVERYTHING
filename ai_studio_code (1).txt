@@ -1,0 +1,157 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import './App.css';
+
+const TOTAL_CIRCLES = 17;
+const COLUMN_STRUCTURE = [3, 4, 3, 4, 3];
+const DEFAULT_TEXT = "THE QUIET ENERGY OF MORNING";
+
+// 17개 원의 고정 좌표 생성 (3-4-3-4-3)
+const generateGridCoordinates = () => {
+  const coords = [];
+  const spacingX = 100; // 원 사이 가로 간격
+  const spacingY = 100; // 원 사이 세로 간격
+
+  COLUMN_STRUCTURE.forEach((rowCount, colIndex) => {
+    const offset = rowCount === 3 ? 50 : 0; // 3개짜리 행은 수직 중앙 정렬을 위해 오프셋 부여
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+      coords.push({
+        id: `circle-${coords.length}`,
+        x: colIndex * spacingX,
+        y: rowIndex * spacingY + offset,
+      });
+    }
+  });
+  return coords;
+};
+
+function App() {
+  const [inputText, setInputText] = useState('');
+  const [nodes, setNodes] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const gridRef = useRef(null);
+
+  // 데이터 생성 알고리즘
+  const generateLayout = useCallback(async (textToUse = DEFAULT_TEXT) => {
+    setIsLoading(true);
+    const coords = generateGridCoordinates();
+    const words = textToUse.toUpperCase().split(/\s+/).filter(Boolean);
+    
+    // 타입 배정 (text 8, image 5, empty 4)
+    let types = [
+      ...Array(8).fill('text'),
+      ...Array(5).fill('image'),
+      ...Array(4).fill('empty')
+    ].sort(() => Math.random() - 0.5);
+
+    // 이미지 검색어 추출 (입력 문장에서 무작위 단어 선택)
+    const searchQuery = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : 'abstract';
+    
+    let imageUrls = [];
+    try {
+      const res = await fetch(`/api/images?q=${encodeURIComponent(searchQuery)}`);
+      const data = await res.json();
+      imageUrls = data.images || [];
+    } catch (e) {
+      console.error("Image fetch failed", e);
+    }
+
+    let wordIdx = 0;
+    let imgIdx = 0;
+
+    const newNodes = coords.map((coord, i) => {
+      const type = types[i];
+      let content = null;
+
+      if (type === 'text') {
+        content = words[wordIdx % words.length] || '•';
+        wordIdx++;
+      } else if (type === 'image') {
+        content = imageUrls[imgIdx % imageUrls.length] || null;
+        imgIdx++;
+      }
+
+      return { ...coord, type, content };
+    });
+
+    setNodes(newNodes);
+    setIsLoading(false);
+  }, []);
+
+  // 초기 렌더링
+  useEffect(() => {
+    generateLayout();
+  }, [generateLayout]);
+
+  // 자동 이동 마커 (5~8초)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex(prev => (prev + 1) % TOTAL_CIRCLES);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleGenerate = (e) => {
+    e.preventDefault();
+    generateLayout(inputText || DEFAULT_TEXT);
+  };
+
+  return (
+    <div className="app-container">
+      <header className="brand-header">
+        <div className="logo-text">IDENTITY SYSTEM v1.0</div>
+      </header>
+
+      <main className="canvas-section">
+        <div className="logo-system" ref={gridRef}>
+          {/* 17개 원 렌더링 */}
+          {nodes.map((node, index) => (
+            <div
+              key={node.id}
+              className={`circle ${node.type} ${activeIndex === index ? 'active' : ''}`}
+              style={{
+                left: `${node.x}px`,
+                top: `${node.y}px`,
+              }}
+              onClick={() => setActiveIndex(index)}
+            >
+              {node.type === 'text' && <span className="circle-text">{node.content}</span>}
+              {node.type === 'image' && node.content && (
+                <img src={node.content} alt="brand-visual" className="circle-image" />
+              )}
+              {node.type === 'image' && !node.content && <div className="shimmer" />}
+            </div>
+          ))}
+
+          {/* 이동 마커 (제공된 로고 이미지 사용) */}
+          {nodes[activeIndex] && (
+            <div 
+              className="moving-marker"
+              style={{
+                transform: `translate(${nodes[activeIndex].x}px, ${nodes[activeIndex].y}px)`
+              }}
+            >
+              <img src="/assets/logo-reference.jpg" alt="marker" />
+            </div>
+          )}
+        </div>
+      </main>
+
+      <footer className="interaction-bar">
+        <form onSubmit={handleGenerate} className="input-group">
+          <input 
+            type="text" 
+            placeholder="Enter text to generate identity..." 
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+          />
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'GENERATING...' : 'GENERATE'}
+          </button>
+        </form>
+      </footer private>
+    </div>
+  );
+}
+
+export default App;

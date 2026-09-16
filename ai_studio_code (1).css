@@ -1,0 +1,169 @@
+:root {
+  --bg-color: #ffffff;
+  --circle-default: #d9d9d9;
+  --text-active: #1a1a1a;
+  --text-inactive: #888888;
+  --transition-smooth: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+}
+
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand-header {
+  padding: 40px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+.canvas-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* 로고 시스템 레이아웃 */
+.logo-system {
+  position: relative;
+  width: 400px;  /* 5 cols * 100px */
+  height: 350px; /* 4 rows * 100px */
+}
+
+.circle {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--circle-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+  z-index: 2;
+}
+
+.circle:hover {
+  transform: scale(1.06);
+}
+
+.circle.active {
+  box-shadow: 0 0 0 1px #000;
+}
+
+.circle-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-inactive);
+  text-align: center;
+  padding: 5px;
+  word-break: break-all;
+}
+
+.circle.active .circle-text {
+  color: var(--text-active);
+}
+
+.circle-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.4s ease;
+}
+
+.circle:hover .circle-image {
+  filter: brightness(1.1);
+}
+
+.empty {
+  background-color: #eeeeee;
+}
+
+/* 이동 마커 */
+.moving-marker {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  z-index: 10;
+  pointer-events: none;
+  transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moving-marker img {
+  width: 30px; /* 마커 사이즈 조정 */
+  height: 30px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+/* 입력창 */
+.interaction-bar {
+  padding-bottom: 60px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 5px;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  width: 300px;
+  text-transform: uppercase;
+}
+
+.input-group button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* 로딩 애니메이션 */
+.shimmer {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@media (max-width: 600px) {
+  .logo-system { transform: scale(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moving-marker, .circle {
+    transition: none !important;
+  }
+}
