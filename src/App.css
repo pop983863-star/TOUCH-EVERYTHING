@@ -1,18 +1,41 @@
-/* 1. 최상단에 폰트 임포트 추가 */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
-:root {
-  --node-size: 96px;
-  --grid-w: 496px;
-  --grid-h: 396px;
-}
+/* 1. 최상단에 IBM Plex Sans 폰트 임포트 (400, 700 두 가지 굵기) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap');
 
-
-/* 2. body의 font-family 수정 */
+/* 2. 전체 기본 폰트 설정 (Regular) */
 body {
   margin: 0;
   background-color: #ffffff;
-  font-family: 'IBM Plex Sans', sans-serif; /* 이 라인을 수정 */
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400; /* 기본은 레귤러 */
   overflow: hidden;
+}
+
+/* 3. 제목(서브페이지 큰 글씨)만 Bold 적용 */
+.sub-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700; /* 제목은 볼드 */
+  font-size: 48px;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+/* 4. 상단 메뉴 버튼 Bold 적용 (디자인 강조를 위해 보통 메뉴도 볼드를 씁니다) */
+.top-nav button {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700; /* 메뉴 제목도 볼드 */
+  background: none;
+  border: none;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  color: #d1d1d1;
+  transition: color 0.4s ease;
+}
+
+/* 5. 입력창 및 설명글은 Regular 유지 */
+input, .sub-desc {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400; /* 나머지는 레귤러 */
 }
 
 /* 최상위 컨테이너: 화면 전체 꽉 채움 */
