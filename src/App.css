@@ -39,7 +39,7 @@ body {
   position: relative;
 }
 
-/* [핵심] 그리드 래퍼: 중앙 정렬 보장 및 쏠림 방지 */
+/* 그리드 래퍼: 중앙 정렬 유지 */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
@@ -52,7 +52,7 @@ body {
   top: 0; left: 0;
   width: 100%; height: 100%;
   opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 1.5s ease-in-out;
   pointer-events: none;
 }
 
@@ -62,11 +62,9 @@ body {
   z-index: 10;
 }
 
-/* [핵심] 초기 이미지: 그리드 좌표와 1:1 일치시키기 위해 fill 사용 */
 .layer-static img {
-  width: 100%;
-  height: 100%;
-  object-fit: fill; /* 496x396 영역에 꽉 맞춤 */
+  width: 100%; height: 100%;
+  object-fit: fill;
   display: block;
 }
 
@@ -77,6 +75,7 @@ body {
   border-radius: 50%;
   background-repeat: no-repeat;
   background-size: var(--grid-w) var(--grid-h);
+  background-color: #f9f9f9;
   transition: background-image 1.5s ease-in-out;
 }
 
@@ -92,14 +91,13 @@ body {
 }
 
 .logo-overlay-marker img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
   transform: scale(1.02);
 }
 
-/* 푸터 레이아웃 */
+/* --- 푸터 및 입력창 정중앙 고정 --- */
 .footer-layout {
   height: 120px;
   display: flex;
@@ -111,16 +109,22 @@ body {
 .footer-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* 자식 요소 가로 중앙 정렬 */
   gap: 12px;
+  width: 100%;
 }
 
 .footer-form {
   border-bottom: 0.5px solid #111;
   padding: 5px 0;
   width: 320px;
+  max-width: 80vw;
+  display: flex;
+  justify-content: center; /* 입력창을 가로 중앙으로 */
+  overflow: visible;
 }
 
+/* [핵심 수정] 입력값 우측 쏠림 방지 */
 input {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
@@ -128,13 +132,19 @@ input {
   outline: none;
   background: transparent;
   text-transform: uppercase;
-  text-align: center;
+  text-align: center; /* 텍스트 자체 중앙 정렬 */
   letter-spacing: 0.2em;
   color: #111;
-  font-size: 16px;
-  transform: scale(0.5625);
-  width: 568px; /* 320 / 0.5625 */
-  display: block;
+  
+  font-size: 16px; /* iOS 줌 방지 */
+  width: 177.7%; /* scale 역수 (1/0.5625 * 100) */
+  transform: scale(0.5625); /* 9px 효과 */
+  
+  /* [수정] 스케일 변환 기준점을 정중앙으로 고정하여 쏠림 방지 */
+  transform-origin: center center; 
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .footer-hint {
@@ -152,26 +162,23 @@ input {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- [수정] 모바일 중앙 정렬 강제 로직 --- */
+/* --- 모바일 반응형 중앙 정렬 --- */
 
 @media (max-width: 600px) {
-  /* flex 정렬이 어긋날 수 있으므로 absolute 중앙 정렬로 교체 */
   .main-grid-wrapper {
     position: absolute;
     left: 50%;
     top: 50%;
-    /* translate(-50%, -50%)를 유지하며 scale을 적용하여 완벽하게 화면 중앙 고정 */
+    /* 수평/수직 정중앙을 유지하며 scale만 조절 */
     transform: translate(-50%, -50%) scale(0.72);
   }
-  
-  .footer-form { width: 80vw; }
   .top-nav { gap: 30px; top: 40px; }
   .sub-title { font-size: 32px; }
 }
 
 @media (max-width: 400px) {
   .main-grid-wrapper {
-    transform: translate(-50%, -50%) scale(0.62); /* 더 작은 기기에선 62% */
+    transform: translate(-50%, -50%) scale(0.6);
   }
 }
 
@@ -184,9 +191,10 @@ input {
 .top-nav { position: absolute; top: 60px; display: flex; gap: 50px; }
 .top-nav button { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; background: none; border: none; font-size: 11px; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
 .top-nav button.active, .top-nav button:hover { color: #000; }
-.sub-title { margin-bottom: 20px; }
-.sub-desc { font-size: 14px; color: #666; max-width: 320px; text-align: center; line-height: 1.6; }
+.sub-title { margin-bottom: 20px; font-weight: 700; }
+.sub-desc { font-size: 14px; color: #666; max-width: 320px; text-align: center; line-height: 1.6; padding: 0 20px; }
 .home-back-btn { position: absolute; right: 30px; bottom: 30px; width: 50px; height: 50px; cursor: pointer; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.clickable { cursor: pointer !important; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
