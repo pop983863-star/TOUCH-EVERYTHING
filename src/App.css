@@ -50,7 +50,7 @@ body {
   pointer-events: none;
 }
 
-.is-active {
+.is-active, .on {
   opacity: 1 !important;
   pointer-events: auto !important;
   z-index: 10;
@@ -62,7 +62,6 @@ body {
   display: block;
 }
 
-/* 이미지 부드러운 전환 설정 */
 .mask-circle {
   position: absolute;
   width: var(--node-size);
@@ -71,7 +70,6 @@ body {
   background-repeat: no-repeat;
   background-size: var(--grid-w) var(--grid-h);
   background-color: #f9f9f9;
-  /* 1.5초 크로스페이드 효과 */
   transition: background-image 1.5s ease-in-out;
 }
 
@@ -105,7 +103,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px; /* 밑줄과 힌트 사이의 여백 */
 }
 
 .footer-form {
@@ -114,6 +112,7 @@ body {
   width: 320px; 
 }
 
+/* 메인 입력 텍스트 스타일 (9px) */
 input {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
@@ -128,18 +127,22 @@ input {
   color: #111;
 }
 
-/* 가이드 문구 스타일 */
+/* TOUCH SYMBOL 힌트 스타일 */
 .footer-hint {
-  font-size: 6.5px;
-  color: #aaaaaa;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  font-size: 9px; /* 입력 텍스트와 동일 크기 */
+  color: #d1d1d1; /* 연한 회색으로 위계 부여 */
   letter-spacing: 0.2em;
   text-transform: uppercase;
+  text-align: center;
   opacity: 0;
-  animation: hintFadeIn 1.2s ease forwards;
+  /* 1.5초 동안 나타나는 애니메이션, 3초 지연 후 시작 */
+  animation: hintAppear 1.5s ease 3s forwards;
 }
 
-@keyframes hintFadeIn {
-  from { opacity: 0; transform: translateY(-3px); }
+@keyframes hintAppear {
+  from { opacity: 0; transform: translateY(-2px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
