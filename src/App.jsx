@@ -28,15 +28,32 @@ function App() {
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
 
+  // --- [핵심 수정] 이미지 프리로딩 함수 ---
+  const preloadImage = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => resolve(url);
+      img.onerror = reject;
+    });
+  };
+
   const fetchNewImage = async (query = 'abstract') => {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}`);
       const data = await res.json();
+      
       if (data.images && data.images.length > 0) {
-        setCurrentBgImage(data.images[Math.floor(Math.random() * data.images.length)]);
+        const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
+        
+        // 브라우저가 이미지를 다 받을 때까지 기다린 후 상태 업데이트 (번쩍임 방지)
+        await preloadImage(nextImgUrl);
+        setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
+      const fallback = `https://picsum.photos/seed/${Math.random()}/1200/800`;
+      await preloadImage(fallback);
+      setCurrentBgImage(fallback);
     }
   };
 
@@ -69,7 +86,7 @@ function App() {
         } else if (mode === 'static' && diff >= 20 && diff < 50) {
           if (mode !== 'slideshow') {
             setMode('slideshow');
-            fetchNewImage('nature');
+            fetchNewImage('minimal');
           }
         } else if (mode === 'slideshow' && diff >= 50) {
           setMode('static');
@@ -102,7 +119,7 @@ function App() {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => {
         moveLogos();
-        fetchNewImage(inputText || 'minimal');
+        fetchNewImage(inputText || 'art');
       }, 5000);
       return () => clearInterval(interval);
     }
@@ -120,7 +137,7 @@ function App() {
               <div key={node.id} className="mask-circle"
                 style={{ 
                   left: `${node.x}px`, top: `${node.y}px`,
-                  backgroundImage: `url(${currentBgImage})`,
+                  backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none',
                   backgroundPosition: `-${node.x}px -${node.y}px`,
                   backgroundSize: '496px 396px' 
                 }}
@@ -138,14 +155,9 @@ function App() {
           </div>
         </div>
       </div>
-      
       <footer className="footer-layout">
         <form onSubmit={(e) => { e.preventDefault(); fetchNewImage(inputText); }} className="footer-form">
-          <input 
-            value={inputText} 
-            onChange={(e) => handleHomeInteraction(e.target.value)} 
-            placeholder="TYPE TO START" 
-          />
+          <input value={inputText} onChange={(e) => handleHomeInteraction(e.target.value)} placeholder="TYPE TO START" />
         </form>
       </footer>
     </div>
