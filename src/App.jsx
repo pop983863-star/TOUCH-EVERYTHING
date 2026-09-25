@@ -37,7 +37,7 @@ function App() {
     });
   };
 
-  const fetchNewImage = async (query = 'abstract') => {
+  const fetchNewImage = async (query = 'minimal') => {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}`);
       const data = await res.json();
@@ -126,11 +126,9 @@ function App() {
     <div className="page-home">
       <div className="viewport">
         <div className="main-grid-wrapper">
-          {/* 정적 이니셜 뷰 */}
           <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}>
             <img src="/assets/initial-grid.png" alt="Static Grid" />
           </div>
-          {/* 동적 그리드 뷰 */}
           <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
             {nodes.map((node) => (
               <div key={node.id} className="mask-circle"
