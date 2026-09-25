@@ -18,7 +18,6 @@ const generateGridNodes = () => {
 };
 
 function App() {
-  // --- 상태 관리 ---
   const [view, setView] = useState('home'); 
   const [inputText, setInputText] = useState('');
   const [nodes] = useState(generateGridNodes());
@@ -26,10 +25,9 @@ function App() {
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
   
-  const lastInteractionTime = useRef(Date.now()); // 인트로 시퀀스용
-  const subPageActivityTime = useRef(Date.now()); // 3분 자동복귀용
+  const lastInteractionTime = useRef(Date.now()); 
+  const subPageActivityTime = useRef(Date.now()); 
 
-  // --- [이미지 안정성] 프리로딩 로직 ---
   const preloadImage = (url) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -45,7 +43,6 @@ function App() {
       const data = await res.json();
       if (data.images && data.images.length > 0) {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
-        // 브라우저가 이미지를 다 받을 때까지 기다린 후 교체 (번쩍임 방지)
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
@@ -56,7 +53,6 @@ function App() {
     }
   };
 
-  // --- 인터랙션 핸들러 ---
   const handleHomeInteraction = (val) => {
     setInputText(val);
     lastInteractionTime.current = Date.now();
@@ -76,12 +72,9 @@ function App() {
     });
   }, []);
 
-  // --- 타이머 & 시퀀스 로직 ---
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
-      
-      // 1. 홈 화면 시퀀스 (10초/30초)
       if (view === 'home') {
         const diff = (now - lastInteractionTime.current) / 1000;
         if (mode === 'interactive' && diff >= 10) {
@@ -97,8 +90,6 @@ function App() {
           setActiveIndices(INITIAL_LOGO_INDICES);
         }
       }
-
-      // 2. 서브페이지 3분 무반응 복귀
       if (view !== 'home') {
         const inactiveDiff = (now - subPageActivityTime.current) / 1000;
         if (inactiveDiff >= 180) {
@@ -111,7 +102,6 @@ function App() {
     return () => clearInterval(timer);
   }, [mode, view]);
 
-  // 서브페이지 활동 감지
   useEffect(() => {
     const handleGlobalMove = () => { subPageActivityTime.current = Date.now(); };
     window.addEventListener('mousemove', handleGlobalMove);
@@ -122,7 +112,6 @@ function App() {
     };
   }, []);
 
-  // 로고 이동 및 이미지 교체 타이머
   useEffect(() => {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => {
@@ -133,7 +122,6 @@ function App() {
     }
   }, [mode, view, moveLogos, inputText]);
 
-  // --- 렌더링 ---
   const renderHome = () => (
     <div className="page-home">
       <div className="viewport">
@@ -168,9 +156,13 @@ function App() {
       <footer className="footer-layout">
         <div className="footer-container">
           <form onSubmit={(e) => { e.preventDefault(); fetchNewImage(inputText); }} className="footer-form">
-            <input value={inputText} onChange={(e) => handleHomeInteraction(e.target.value)} placeholder="TYPE TO START" />
+            <input 
+              value={inputText} 
+              onChange={(e) => handleHomeInteraction(e.target.value)} 
+              placeholder="TYPE TO START" 
+            />
           </form>
-          {/* 가이드 문구: 타이핑 시작 시 페이드인 */}
+          {/* 가이드 문구: 모드가 정적이 아닐 때(타이핑 시작 시) 조건부 렌더링 */}
           {mode !== 'static' && (
             <div className="footer-hint">TOUCH SYMBOL</div>
           )}
