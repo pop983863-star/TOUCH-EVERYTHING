@@ -47,9 +47,7 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      const fallback = `https://picsum.photos/seed/${Math.random()}/1200/800`;
-      await preloadImage(fallback);
-      setCurrentBgImage(fallback);
+      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
     }
   };
 
@@ -103,12 +101,12 @@ function App() {
   }, [mode, view]);
 
   useEffect(() => {
-    const handleReset = () => { subPageActivityTime.current = Date.now(); };
-    window.addEventListener('mousemove', handleReset);
-    window.addEventListener('touchstart', handleReset);
+    const reset = () => { subPageActivityTime.current = Date.now(); };
+    window.addEventListener('mousemove', reset);
+    window.addEventListener('touchstart', reset);
     return () => {
-      window.removeEventListener('mousemove', handleReset);
-      window.removeEventListener('touchstart', handleReset);
+      window.removeEventListener('mousemove', reset);
+      window.removeEventListener('touchstart', reset);
     };
   }, []);
 
@@ -127,7 +125,7 @@ function App() {
       <div className="viewport">
         <div className="main-grid-wrapper">
           <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}>
-            <img src="/assets/initial-grid.png" alt="Static Grid" />
+            <img src="/assets/initial-grid.png" alt="Static" />
           </div>
           <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
             {nodes.map((node) => (
