@@ -4,7 +4,6 @@ import './App.css';
 const COLUMN_STRUCTURE = [3, 4, 3, 4, 3];
 const TOTAL_NODES = 17;
 const INITIAL_LOGO_INDICES = [3, 13]; 
-const SAFE_FALLBACKS = ['sunny day', 'modern architecture', 'clear blue ocean', 'green forest', 'minimalist design'];
 
 const generateGridNodes = () => {
   const nodes = [];
@@ -26,13 +25,12 @@ function App() {
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
-  
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
+  
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
-  
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
 
@@ -46,35 +44,20 @@ function App() {
     });
   };
 
-  // --- [수정] 사용자 키워드 우선 이미지 검색 함수 ---
   const fetchNewImage = async (query = '', color = null) => {
-    // 1. 금지어 검사
-    const badWords = ['horror', 'scary', 'blood', 'gore', 'ghost', 'kill', 'death'];
-    const isUnsafe = badWords.some(bw => query.toLowerCase().includes(badWords));
-    
-    // 2. 안전한 쿼리 결정
-    let safeQuery = query.trim();
-    if (isUnsafe || safeQuery === '') {
-      safeQuery = SAFE_FALLBACKS[Math.floor(Math.random() * SAFE_FALLBACKS.length)];
-    }
-
     try {
-      let url = `/api/images?q=${encodeURIComponent(safeQuery)}`;
+      let url = `/api/images?q=${encodeURIComponent(query)}`;
       if (color) url += `&color=${encodeURIComponent(color)}`;
       
       const res = await fetch(url);
       const data = await res.json();
-      
       if (data.images && data.images.length > 0) {
-        // 여러 장 중 무작위 하나 선택하여 다양성 확보
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      const fallback = `https://picsum.photos/seed/${Math.random()}/1200/800`;
-      await preloadImage(fallback);
-      setCurrentBgImage(fallback);
+      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
     }
   };
 
@@ -84,7 +67,7 @@ function App() {
     subPageActivityTime.current = Date.now();
     if (mode === 'static' && val.trim() !== '') {
       setMode('interactive');
-      fetchNewImage(val); // 타이핑한 글자로 이미지 검색
+      fetchNewImage(val);
     }
   };
 
@@ -97,7 +80,6 @@ function App() {
     });
   }, []);
 
-  // --- EVERYTHING 망점 드로잉 ---
   const drawHalftone = useCallback(async () => {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     const canvas = canvasRef.current;
@@ -115,9 +97,7 @@ function App() {
       ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
       const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
       imageBuffer.current = imageDataObj;
-
-      if (dotSize <= 1) return; // 덴시티 1일 때 원본
-
+      if (dotSize <= 1) return;
       const data = imageDataObj.data;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let h = 0; h < canvas.height; h += dotSize) {
@@ -143,13 +123,11 @@ function App() {
     const hex = rgbToHex(data[i], data[i+1], data[i+2]);
     setSelectedColor(hex);
     setIsZooming(true);
-    // 에브리띵 페이지에서 컬러 클릭 시: 기존 키워드 + 컬러 조합
-    fetchNewImage(inputText || 'minimal', hex).then(() => {
+    fetchNewImage(inputText, hex).then(() => {
       setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500);
     });
   };
 
-  // 타이머/시퀀스 로직
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
@@ -170,19 +148,28 @@ function App() {
   }, [mode, view]);
 
   useEffect(() => {
+    const reset = () => { subPageActivityTime.current = Date.now(); };
+    window.addEventListener('mousemove', reset);
+    window.addEventListener('touchstart', reset);
+    return () => {
+      window.removeEventListener('mousemove', reset);
+      window.removeEventListener('touchstart', reset);
+    };
+  }, []);
+
+  useEffect(() => {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => { moveLogos(); fetchNewImage(inputText); }, 5000);
       return () => clearInterval(interval);
     }
   }, [mode, view, moveLogos, inputText]);
 
-  // 렌더링 파트
   const renderNav = () => (
     <nav className="top-nav">
       {['about', 'identity', 'objects'].map(v => (
         <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
       ))}
-      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage(inputText || 'nature'); }}>EVERYTHING</button>
+      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
     </nav>
   );
 
@@ -201,7 +188,7 @@ function App() {
         <div className="page-home">
           <div className="viewport">
             <div className="main-grid-wrapper">
-              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
+              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map(n => (
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
@@ -228,7 +215,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Brand System Documentation for {view}.</p>
+            <p className="sub-desc">Experimental Design System for {view}.</p>
           </div>
           <HomeLogo />
         </div>
@@ -243,7 +230,9 @@ function App() {
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          <div className="everything-zoom-hint">CLICK ANYWHERE TO ZOOM INTO COLOR</div>
+          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
+            {selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+          </div>
           <HomeLogo />
         </div>
       )}
