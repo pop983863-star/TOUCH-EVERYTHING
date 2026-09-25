@@ -106,9 +106,11 @@ function App() {
     const handleGlobalMove = () => { subPageActivityTime.current = Date.now(); };
     window.addEventListener('mousemove', handleGlobalMove);
     window.addEventListener('keydown', handleGlobalMove);
+    window.addEventListener('touchstart', handleGlobalMove);
     return () => {
       window.removeEventListener('mousemove', handleGlobalMove);
       window.removeEventListener('keydown', handleGlobalMove);
+      window.removeEventListener('touchstart', handleGlobalMove);
     };
   }, []);
 
@@ -127,7 +129,7 @@ function App() {
       <div className="viewport">
         <div className="main-grid-wrapper">
           <div className={`layer-static ${mode === 'static' ? 'is-active' : ''}`}>
-            <img src="/assets/initial-grid.png" alt="Static Grid" className="pixel-perfect" />
+            <img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" />
           </div>
           <div className={`layer-dynamic ${mode !== 'static' ? 'is-active' : ''}`}>
             {nodes.map((node) => (
@@ -160,9 +162,9 @@ function App() {
               value={inputText} 
               onChange={(e) => handleHomeInteraction(e.target.value)} 
               placeholder="TYPE TO START" 
+              inputMode="text"
             />
           </form>
-          {/* 가이드 문구: 모드가 정적이 아닐 때(타이핑 시작 시) 조건부 렌더링 */}
           {mode !== 'static' && (
             <div className="footer-hint">TOUCH SYMBOL</div>
           )}
