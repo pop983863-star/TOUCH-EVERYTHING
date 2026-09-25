@@ -2,50 +2,44 @@ export default async function handler(req, res) {
   const { q, color } = req.query;
   const apiKey = process.env.PEXELS_API_KEY;
 
-  // 1. 금지어 목록 (블랙리스트)
-  const blacklist = [
-    'horror', 'scary', 'blood', 'ghost', 'death', 'kill', 'darkness', 'creepy',
-    'sexy', 'nude', 'adult', 'gore', 'weapon', 'zombie', 'monster'
-  ];
+  if (!apiKey) return res.status(500).json({ error: "API Key missing" });
 
-  // 2. 입력어 정화 (Sanitize)
-  // 사용자가 입력한 단어 중 블랙리스트에 포함된 것이 있으면 'nature'로 강제 치환
-  let safeQuery = (q || 'nature').toLowerCase();
-  blacklist.forEach(word => {
-    if (safeQuery.includes(word)) {
-      safeQuery = 'nature'; 
-    }
-  });
+  // 1. 금지어 발견 시 즉시 'curated' 모드로 전환하기 위한 리스트
+  const forbidden = ['horror', 'scary', 'blood', 'gore', 'dead', 'ghost', 'kill', 'creepy', 'dark', 'pain'];
+  const query = (q || '').toLowerCase();
+  const isUnsafe = forbidden.some(word => query.includes(word));
 
   try {
-    let images = [];
-    if (apiKey) {
-      // 3. 부정 검색어 강제 주입
-      // 키워드 뒤에 -horror, -blood 등을 붙여 검색 결과에서 제외하도록 유도 (일부 엔진 지원)
-      const safetyAddon = " -horror -blood -scary -creepy -adult";
-      let apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery + safetyAddon)}&per_page=15`;
-      
-      if (color) apiUrl += `&color=${encodeURIComponent(color)}`;
-
-      const response = await fetch(apiUrl, {
-        headers: { Authorization: apiKey }
-      });
-      const data = await response.json();
-      
-      // Pexels에서 제공하는 기본 필터링 외에 한번 더 검증
-      images = data.photos ? data.photos.map(p => p.src.large) : [];
+    let apiUrl;
+    
+    // 2. 사용자의 단어가 안전하고 존재한다면 search, 아니면 curated(검증된 사진들) 호출
+    if (q && !isUnsafe) {
+      // 긍정적인 단어(serene, beautiful)만 덧붙여서 분위기를 밝게 유도
+      apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q + " serene beautiful")}&per_page=15&orientation=landscape`;
+    } else {
+      // 위험한 단어거나 입력이 없을 때: Pexels에서 엄선한 고화질 안전 사진(Curated)만 가져옴
+      apiUrl = `https://api.pexels.com/v1/curated?per_page=15`;
     }
 
+    if (color) {
+      // 컬러 탐험 시에는 컬러 파라미터 추가
+      apiUrl += `&color=${encodeURIComponent(color)}`;
+    }
+
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: apiKey }
+    });
+    const data = await response.json();
+    
+    let images = data.photos ? data.photos.map(p => p.src.large) : [];
+
+    // 결과가 0개일 경우를 대비한 최후의 안전한 자연 이미지
     if (images.length === 0) {
-      // 4. 안전한 백업 이미지 (Picsum 등에서 평화로운 키워드로 생성)
-      images = [
-        `https://picsum.photos/seed/safe${Math.random()}/1200/800`,
-        `https://picsum.photos/seed/peace${Math.random()}/1200/800`
-      ];
+      images = [`https://images.pexels.com/photos/2817421/pexels-photo-2817421.jpeg?auto=compress&cs=tinysrgb&w=1200`];
     }
 
     res.status(200).json({ images });
   } catch (error) {
-    res.status(500).json({ error: "Fetch failed" });
+    res.status(200).json({ images: [`https://picsum.photos/seed/nature/1200/800`] });
   }
 }
