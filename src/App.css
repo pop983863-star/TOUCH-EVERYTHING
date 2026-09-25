@@ -12,7 +12,6 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
   overflow: hidden;
-  /* 모바일에서 텍스트 선택 및 하이라이트 방지 */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -21,6 +20,7 @@ body {
   height: 100vh;
   display: flex;
   position: relative;
+  overflow: hidden;
 }
 
 .page-home {
@@ -35,33 +35,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
-/* [핵심] 그리드 래퍼: 모바일에서 화면 폭에 맞춰 scale 자동 조절 */
+/* [수정] 그리드 래퍼: 정중앙 기준점 설정 */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
   height: var(--grid-h);
-  transition: transform 0.3s ease;
+  /* 기준점을 정중앙으로 설정하여 모바일 축소 시 쏠림 방지 */
+  transform-origin: center center; 
 }
 
-/* 1. 레이어 및 그리드 요소 (기존 유지) */
 .layer-static, .layer-dynamic {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
   opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 1.5s ease-in-out;
   pointer-events: none;
 }
 
-.is-active, .on {
+.on {
   opacity: 1 !important;
   pointer-events: auto !important;
   z-index: 10;
 }
 
-.pixel-perfect { width: 100%; height: 100%; object-fit: fill; display: block; }
+/* [수정] 초기 로고 이미지: 찌그러짐 방지 */
+.layer-static img {
+  width: 100%;
+  height: 100%;
+  /* fill 대신 contain을 사용하여 원본 비율 유지 */
+  object-fit: contain; 
+  display: block;
+}
 
 .mask-circle {
   position: absolute;
@@ -86,18 +94,21 @@ body {
 }
 
 .logo-overlay-marker img {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  object-fit: cover;
+  /* 로고 마커도 비율 유지하며 꽉 채움 */
+  object-fit: cover; 
   transform: scale(1.02);
 }
 
-/* 푸터 레이아웃 */
+/* 푸터 영역 */
 .footer-layout {
-  height: 140px;
+  height: 120px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  width: 100%;
 }
 
 .footer-container {
@@ -110,12 +121,12 @@ body {
 .footer-form {
   border-bottom: 0.5px solid #111;
   padding: 5px 0;
-  width: 320px; 
+  width: 320px;
   display: flex;
   justify-content: center;
 }
 
-/* [핵심] 모바일 입력창 줌 방지 기술 */
+/* 입력창 줌 방지 및 중앙 정렬 */
 input {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
@@ -126,11 +137,10 @@ input {
   text-align: center;
   letter-spacing: 0.2em;
   color: #111;
-  
-  /* 브라우저는 16px로 인식(확대 안함), 사용자는 9px로 인식(디자인 유지) */
-  font-size: 16px; 
-  transform: scale(0.5625); /* 9 / 16 = 0.5625 */
-  width: 177.7%; /* 축소된 비율만큼 폭을 넓혀 320px 유지 (100 / 0.5625) */
+  font-size: 16px; /* iOS 줌 방지용 최소 크기 */
+  transform: scale(0.5625); /* 시각적으론 9px로 축소 */
+  width: 568px; /* 축소된 스케일에 맞춰 가로폭 보정 */
+  margin: 0 auto;
 }
 
 .footer-hint {
@@ -140,7 +150,6 @@ input {
   color: #d1d1d1;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  text-align: center;
   opacity: 0;
   animation: hintAppear 1.5s ease 3s forwards;
 }
@@ -150,48 +159,41 @@ input {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- 모바일 반응형 조절 (Media Queries) --- */
+/* --- [수정] 모바일 반응형 세밀 조정 --- */
 
-@media (max-width: 550px) {
-  /* 그리드 시스템을 모바일 폭에 맞춰 통째로 축소 (비비율 유지) */
+@media (max-width: 600px) {
+  /* 화면이 600px 이하일 때 화면 폭의 약 80%가 되도록 유연하게 축소 */
   .main-grid-wrapper {
-    transform: scale(0.7); /* 70% 크기로 축소 */
+    transform: scale(0.75); 
   }
   
   .footer-form {
-    width: 80vw; /* 입력창 라인도 유연하게 */
-  }
-
-  .top-nav {
-    gap: 30px;
-    width: 90vw;
-    justify-content: center;
+    width: 80vw;
   }
   
-  .sub-title {
-    font-size: 32px;
-  }
+  .sub-title { font-size: 32px; }
+  .top-nav { gap: 30px; top: 40px; }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 400px) {
   .main-grid-wrapper {
-    transform: scale(0.6); /* 더 작은 폰에서는 60%로 */
+    transform: scale(0.65); /* 더 작은 폰에선 65%로 축소 */
   }
 }
 
-/* 서브페이지 스타일 (기존 유지) */
+/* 서브페이지 (기존 유지) */
 .page-sub {
   position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: #fff; z-index: 100; animation: fadeIn 1.2s ease;
+  background: #fff; z-index: 100; animation: fadeIn 1s ease;
 }
 .top-nav { position: absolute; top: 60px; display: flex; gap: 50px; }
 .top-nav button { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; background: none; border: none; font-size: 11px; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
-.top-nav button.on, .top-nav button:hover { color: #000; }
-.sub-title { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 48px; letter-spacing: -0.02em; margin-bottom: 20px; }
-.sub-desc { font-family: 'IBM Plex Sans', sans-serif; font-weight: 400; font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; padding: 0 20px; }
-.home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; }
+.top-nav button.active, .top-nav button:hover { color: #000; }
+.sub-title { font-weight: 700; margin-bottom: 20px; }
+.sub-desc { font-size: 14px; color: #666; max-width: 320px; text-align: center; line-height: 1.6; }
+.home-back-btn { position: absolute; right: 30px; bottom: 30px; width: 50px; height: 50px; cursor: pointer; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.clickable-logo { cursor: pointer !important; }
+.clickable { cursor: pointer !important; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
