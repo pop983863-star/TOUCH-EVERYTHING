@@ -4,20 +4,7 @@ import './App.css';
 const COLUMN_STRUCTURE = [3, 4, 3, 4, 3];
 const TOTAL_NODES = 17;
 const INITIAL_LOGO_INDICES = [3, 13]; 
-
-// [보안강화] 부적절한 이미지가 뜰 확률이 낮은 평화로운 키워드 풀
-const CONCRETE_KEYWORDS = [
-  'sunny forest', 'blue ocean', 'minimal architecture', 
-  'flower garden', 'calm sky', 'white interior', 
-  'green park', 'scenic mountain', 'cozy library',
-  'peaceful lake', 'morning mist', 'beige aesthetic'
-];
-
-// [보안강화] 금지어 목록 (블랙리스트)
-const FORBIDDEN_WORDS = [
-  'horror', 'scary', 'blood', 'gore', 'death', 'kill', 'creepy', 
-  'monster', 'sexy', 'nude', 'adult', 'darkness', 'zombie', 'ghost'
-];
+const SAFE_FALLBACKS = ['sunny day', 'modern architecture', 'clear blue ocean', 'green forest', 'minimalist design'];
 
 const generateGridNodes = () => {
   const nodes = [];
@@ -59,34 +46,35 @@ function App() {
     });
   };
 
-  // --- [핵심] 필터링 기능이 포함된 이미지 fetch 함수 ---
+  // --- [수정] 사용자 키워드 우선 이미지 검색 함수 ---
   const fetchNewImage = async (query = '', color = null) => {
-    let safeQuery = query.toLowerCase().trim();
-    let isUnsafe = false;
-
-    // 1. 블랙리스트 단어가 포함되어 있는지 체크
-    FORBIDDEN_WORDS.forEach(word => {
-      if (safeQuery.includes(word)) isUnsafe = true;
-    });
-
-    // 2. 입력어가 비었거나 부적절하면 안전한 키워드 풀에서 무작위 선택
-    if (safeQuery === '' || isUnsafe) {
-      safeQuery = CONCRETE_KEYWORDS[Math.floor(Math.random() * CONCRETE_KEYWORDS.length)];
+    // 1. 금지어 검사
+    const badWords = ['horror', 'scary', 'blood', 'gore', 'ghost', 'kill', 'death'];
+    const isUnsafe = badWords.some(bw => query.toLowerCase().includes(badWords));
+    
+    // 2. 안전한 쿼리 결정
+    let safeQuery = query.trim();
+    if (isUnsafe || safeQuery === '') {
+      safeQuery = SAFE_FALLBACKS[Math.floor(Math.random() * SAFE_FALLBACKS.length)];
     }
 
-    let url = `/api/images?q=${encodeURIComponent(safeQuery)}`;
-    if (color) url += `&color=${encodeURIComponent(color)}`;
-    
     try {
+      let url = `/api/images?q=${encodeURIComponent(safeQuery)}`;
+      if (color) url += `&color=${encodeURIComponent(color)}`;
+      
       const res = await fetch(url);
       const data = await res.json();
+      
       if (data.images && data.images.length > 0) {
+        // 여러 장 중 무작위 하나 선택하여 다양성 확보
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
+      const fallback = `https://picsum.photos/seed/${Math.random()}/1200/800`;
+      await preloadImage(fallback);
+      setCurrentBgImage(fallback);
     }
   };
 
@@ -96,7 +84,7 @@ function App() {
     subPageActivityTime.current = Date.now();
     if (mode === 'static' && val.trim() !== '') {
       setMode('interactive');
-      fetchNewImage(val);
+      fetchNewImage(val); // 타이핑한 글자로 이미지 검색
     }
   };
 
@@ -109,6 +97,7 @@ function App() {
     });
   }, []);
 
+  // --- EVERYTHING 망점 드로잉 ---
   const drawHalftone = useCallback(async () => {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     const canvas = canvasRef.current;
@@ -127,7 +116,7 @@ function App() {
       const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
       imageBuffer.current = imageDataObj;
 
-      if (dotSize <= 1) return; // 덴시티 1일 때 원본 노출
+      if (dotSize <= 1) return; // 덴시티 1일 때 원본
 
       const data = imageDataObj.data;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -152,14 +141,15 @@ function App() {
     const i = (y * canvasRef.current.width + x) * 4;
     const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
     const hex = rgbToHex(data[i], data[i+1], data[i+2]);
-
     setSelectedColor(hex);
     setIsZooming(true);
-    fetchNewImage(inputText, hex).then(() => {
+    // 에브리띵 페이지에서 컬러 클릭 시: 기존 키워드 + 컬러 조합
+    fetchNewImage(inputText || 'minimal', hex).then(() => {
       setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500);
     });
   };
 
+  // 타이머/시퀀스 로직
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
@@ -186,12 +176,13 @@ function App() {
     }
   }, [mode, view, moveLogos, inputText]);
 
+  // 렌더링 파트
   const renderNav = () => (
     <nav className="top-nav">
       {['about', 'identity', 'objects'].map(v => (
         <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
       ))}
-      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
+      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage(inputText || 'nature'); }}>EVERYTHING</button>
     </nav>
   );
 
@@ -200,7 +191,7 @@ function App() {
       if (view === 'everything') setView(lastSubView);
       else { setView('home'); setMode('static'); }
     }}>
-      <img src="/assets/logo-reference.png" alt="Logo" />
+      <img src="/assets/logo-reference.png" alt="Home" />
     </div>
   );
 
@@ -237,7 +228,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Design System for {view}.</p>
+            <p className="sub-desc">Brand System Documentation for {view}.</p>
           </div>
           <HomeLogo />
         </div>
@@ -252,9 +243,7 @@ function App() {
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
-            {selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
-          </div>
+          <div className="everything-zoom-hint">CLICK ANYWHERE TO ZOOM INTO COLOR</div>
           <HomeLogo />
         </div>
       )}
