@@ -18,16 +18,14 @@ const generateGridNodes = () => {
 };
 
 function App() {
-  // --- 상태 관리 ---
-  const [view, setView] = useState('home'); // home, about, identity, objects, everything
-  const [lastSubView, setLastSubView] = useState('about'); // 에브리띵에서 돌아올 곳 저장
+  const [view, setView] = useState('home'); 
+  const [lastSubView, setLastSubView] = useState('about'); 
   const [inputText, setInputText] = useState('');
   const [nodes] = useState(generateGridNodes());
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
   
-  // EVERYTHING 전용
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const canvasRef = useRef(null);
@@ -35,7 +33,6 @@ function App() {
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
 
-  // --- 이미지 프리로딩 (번쩍임 방지) ---
   const preloadImage = (url) => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -56,12 +53,10 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      const fallback = `https://picsum.photos/seed/${Math.random()}/1200/800`;
-      setCurrentBgImage(fallback);
+      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
     }
   };
 
-  // --- 핸들러 ---
   const handleHomeInteraction = (val) => {
     setInputText(val);
     lastInteractionTime.current = Date.now();
@@ -81,7 +76,7 @@ function App() {
     });
   }, []);
 
-  // --- 망점 로직 (EVERYTHING 전용) ---
+  // --- [EVERYTHING] 망점 로직 (최저값일 때 이미지 출력) ---
   const drawHalftone = useCallback(async () => {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     const canvas = canvasRef.current;
@@ -96,8 +91,12 @@ function App() {
       const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
       const x = (canvas.width / 2) - (img.width / 2) * scale;
       const y = (canvas.height / 2) - (img.height / 2) * scale;
+      
       ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
       
+      // 덴시티 값이 최저(2 이하)일 경우 망점 계산을 건너뛰고 이미지 그대로 유지
+      if (dotSize <= 2) return;
+
       try {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -105,7 +104,9 @@ function App() {
           for (let w = 0; w < canvas.width; w += dotSize) {
             const i = (h * canvas.width + w) * 4;
             ctx.fillStyle = `rgb(${imageData[i]},${imageData[i+1]},${imageData[i+2]})`;
-            ctx.beginPath(); ctx.arc(w, h, dotSize * 0.42, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); 
+            ctx.arc(w, h, dotSize * 0.43, 0, Math.PI * 2); 
+            ctx.fill();
           }
         }
       } catch (e) {}
@@ -114,7 +115,7 @@ function App() {
 
   useEffect(() => { if (view === 'everything') drawHalftone(); }, [drawHalftone, view]);
 
-  // --- 타이머 시퀀스 ---
+  // 타이머 로직
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
@@ -141,20 +142,20 @@ function App() {
     }
   }, [mode, view, moveLogos, inputText]);
 
-  // --- 렌더링 부품 ---
+  // 렌더링 도우미
   const renderNav = () => (
     <nav className="top-nav">
       {['about', 'identity', 'objects'].map(v => (
         <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
       ))}
-      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage('color'); }}>EVERYTHING</button>
+      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage(inputText || 'vivid'); }}>EVERYTHING</button>
     </nav>
   );
 
   const HomeLogo = () => (
     <div className="home-back-btn" onClick={() => {
-      if (view === 'everything') setView(lastSubView); // 에브리띵 -> 서브페이지
-      else { setView('home'); setMode('static'); } // 서브페이지 -> 홈
+      if (view === 'everything') setView(lastSubView);
+      else { setView('home'); setMode('static'); }
     }}>
       <img src="/assets/logo-reference.png" alt="Logo" />
     </div>
@@ -193,7 +194,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Brand Experience Design System for {view}.</p>
+            <p className="sub-desc">Experimental Design System for {view}.</p>
           </div>
           <HomeLogo />
         </div>
@@ -201,13 +202,16 @@ function App() {
 
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
-          <canvas ref={canvasRef} onClick={() => { if (isZooming) return; setIsZooming(true); fetchNewImage('abstract').then(() => setTimeout(() => setIsZooming(false), 1500)); }} />
+          <canvas ref={canvasRef} onClick={() => { if (isZooming) return; setIsZooming(true); fetchNewImage(inputText || 'abstract').then(() => setTimeout(() => setIsZooming(false), 1500)); }} />
+          
           <div className="halftone-controls-wrapper">
             <div className="halftone-box">
               <span>DENSITY</span>
-              <input type="range" min="8" max="50" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
+              <input type="range" min="2" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
+
+          <div className="everything-zoom-hint">CLICK ANYWHERE TO ZOOM INTO COLOR</div>
           <HomeLogo />
         </div>
       )}
