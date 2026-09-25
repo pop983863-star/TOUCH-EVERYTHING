@@ -29,11 +29,11 @@ function App() {
   const subPageActivityTime = useRef(Date.now()); 
 
   const preloadImage = (url) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const img = new Image();
       img.src = url;
       img.onload = () => resolve(url);
-      img.onerror = reject;
+      img.onerror = () => resolve(url);
     });
   };
 
@@ -103,14 +103,12 @@ function App() {
   }, [mode, view]);
 
   useEffect(() => {
-    const handleGlobalMove = () => { subPageActivityTime.current = Date.now(); };
-    window.addEventListener('mousemove', handleGlobalMove);
-    window.addEventListener('keydown', handleGlobalMove);
-    window.addEventListener('touchstart', handleGlobalMove);
+    const handleReset = () => { subPageActivityTime.current = Date.now(); };
+    window.addEventListener('mousemove', handleReset);
+    window.addEventListener('touchstart', handleReset);
     return () => {
-      window.removeEventListener('mousemove', handleGlobalMove);
-      window.removeEventListener('keydown', handleGlobalMove);
-      window.removeEventListener('touchstart', handleGlobalMove);
+      window.removeEventListener('mousemove', handleReset);
+      window.removeEventListener('touchstart', handleReset);
     };
   }, []);
 
@@ -128,10 +126,12 @@ function App() {
     <div className="page-home">
       <div className="viewport">
         <div className="main-grid-wrapper">
-          <div className={`layer-static ${mode === 'static' ? 'is-active' : ''}`}>
-            <img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" />
+          {/* 정적 이니셜 뷰 */}
+          <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}>
+            <img src="/assets/initial-grid.png" alt="Static Grid" />
           </div>
-          <div className={`layer-dynamic ${mode !== 'static' ? 'is-active' : ''}`}>
+          {/* 동적 그리드 뷰 */}
+          <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
             {nodes.map((node) => (
               <div key={node.id} className="mask-circle"
                 style={{ 
@@ -144,7 +144,7 @@ function App() {
             ))}
             {activeIndices.map((idx, i) => (
               <div key={`marker-${i}`} 
-                className="logo-overlay-marker clickable-logo"
+                className="logo-overlay-marker clickable"
                 style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}
                 onClick={() => setView('about')}
               >
@@ -176,9 +176,9 @@ function App() {
   const renderSubPage = (title, description) => (
     <div className="page-sub">
       <nav className="top-nav">
-        <button className={view === 'about' ? 'on' : ''} onClick={() => setView('about')}>ABOUT</button>
-        <button className={view === 'identity' ? 'on' : ''} onClick={() => setView('identity')}>IDENTITY</button>
-        <button className={view === 'objects' ? 'on' : ''} onClick={() => setView('objects')}>OBJECTS</button>
+        <button className={view === 'about' ? 'active' : ''} onClick={() => setView('about')}>ABOUT</button>
+        <button className={view === 'identity' ? 'active' : ''} onClick={() => setView('identity')}>IDENTITY</button>
+        <button className={view === 'objects' ? 'active' : ''} onClick={() => setView('objects')}>OBJECTS</button>
       </nav>
       <div className="content-area">
         <h1 className="sub-title">{title}</h1>
