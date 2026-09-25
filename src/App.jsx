@@ -43,19 +43,33 @@ function App() {
     });
   };
 
-  const fetchNewImage = async (query = 'minimal') => {
-    try {
-      const res = await fetch(`/api/images?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (data.images && data.images.length > 0) {
-        const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
-        await preloadImage(nextImgUrl);
-        setCurrentBgImage(nextImgUrl);
-      }
-    } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
+ const fetchNewImage = async (query = '', color = null) => {
+  // 프론트엔드 블랙리스트
+  const forbidden = ['horror', 'scary', 'blood', 'gore', 'death', 'dark'];
+  let isSafe = true;
+
+  forbidden.forEach(word => {
+    if (query.toLowerCase().includes(word)) isSafe = false;
+  });
+
+  // 부적절한 단어가 포함되어 있다면 검색어를 'serene' 혹은 'calm'으로 변경
+  const finalQuery = isSafe ? query : 'serene nature';
+
+  let url = `/api/images?q=${encodeURIComponent(finalQuery)}`;
+  if (color) url += `&color=${encodeURIComponent(color)}`;
+  
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.images && data.images.length > 0) {
+      const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
+      await preloadImage(nextImgUrl);
+      setCurrentBgImage(nextImgUrl);
     }
-  };
+  } catch (e) {
+    setCurrentBgImage(`https://picsum.photos/seed/safe/1200/800`);
+  }
+};
 
   const handleHomeInteraction = (val) => {
     setInputText(val);
