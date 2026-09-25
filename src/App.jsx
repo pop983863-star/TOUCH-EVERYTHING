@@ -19,14 +19,14 @@ const generateGridNodes = () => {
 
 function App() {
   // --- 상태 관리 ---
-  const [view, setView] = useState('home'); // home, about, identity, objects, everything
+  const [view, setView] = useState('home'); 
   const [inputText, setInputText] = useState('');
   const [nodes] = useState(generateGridNodes());
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
   
-  // EVERYTHING 페이지 전용 상태
+  // EVERYTHING 챕터 전용
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const canvasRef = useRef(null);
@@ -34,14 +34,14 @@ function App() {
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
 
-  // --- 이미지 fetch 및 프리로딩 ---
+  // --- 이미지 프리로딩 (안정성 강화) ---
   const preloadImage = (url) => {
     return new Promise((resolve) => {
       const img = new Image();
-      img.crossOrigin = "Anonymous"; // Canvas 픽셀 읽기를 위해 필요
       img.src = url;
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
+      img.crossOrigin = "Anonymous"; // 보안 설정
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(url); // 에러 시에도 진행
     });
   };
 
@@ -53,68 +53,82 @@ function App() {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
-        return nextImgUrl;
       }
     } catch (e) {
       const fallback = `https://picsum.photos/seed/${Math.random()}/1200/800`;
       setCurrentBgImage(fallback);
-      return fallback;
     }
   };
 
-  // --- EVERYTHING 망점 그래픽 로직 ---
+  // --- 홈 인터랙션 핸들러 ---
+  const handleHomeInteraction = (val) => {
+    setInputText(val);
+    lastInteractionTime.current = Date.now();
+    subPageActivityTime.current = Date.now();
+    
+    if (mode === 'static' && val.trim() !== '') {
+      setMode('interactive');
+      fetchNewImage(val);
+    }
+  };
+
+  const moveLogos = useCallback(() => {
+    setActiveIndices(() => {
+      let first = Math.floor(Math.random() * TOTAL_NODES);
+      let second = Math.floor(Math.random() * TOTAL_NODES);
+      while (second === first) second = Math.floor(Math.random() * TOTAL_NODES);
+      return [first, second];
+    });
+  }, []);
+
+  // --- 망점 그래픽 그리기 (EVERYTHING 전용) ---
   const drawHalftone = useCallback(async () => {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const img = await preloadImage(currentBgImage);
-    if (!img) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = currentBgImage;
 
-    // 캔버스 크기를 브라우저에 맞춤
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    img.onload = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+      const x = (canvas.width / 2) - (img.width / 2) * scale;
+      const y = (canvas.height / 2) - (img.height / 2) * scale;
+      
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 이미지를 화면에 꽉 차게 그리기 위한 비율 계산
-    const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-    const x = (canvas.width / 2) - (img.width / 2) * scale;
-    const y = (canvas.height / 2) - (img.height / 2) * scale;
-    
-    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 망점 그리기
-    for (let h = 0; h < canvas.height; h += dotSize) {
-      for (let w = 0; w < canvas.width; w += dotSize) {
-        const index = (h * canvas.width + w) * 4;
-        const r = imageData[index];
-        const g = imageData[index + 1];
-        const b = imageData[index + 2];
-        
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.beginPath();
-        ctx.arc(w, h, dotSize * 0.45, 0, Math.PI * 2);
-        ctx.fill();
+        for (let h = 0; h < canvas.height; h += dotSize) {
+          for (let w = 0; w < canvas.width; w += dotSize) {
+            const index = (h * canvas.width + w) * 4;
+            const r = imageData[index];
+            const g = imageData[index + 1];
+            const b = imageData[index + 2];
+            
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            ctx.beginPath();
+            ctx.arc(w, h, dotSize * 0.42, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      } catch (e) {
+        console.error("CORS 보안으로 인한 망점 데이터 접근 불가");
       }
-    }
+    };
   }, [view, currentBgImage, dotSize]);
 
   useEffect(() => {
-    drawHalftone();
-  }, [drawHalftone]);
+    if (view === 'everything') drawHalftone();
+  }, [drawHalftone, view]);
 
-  // 클릭 시 해당 색상으로 줌인 및 이미지 교체
-  const handleEverythingClick = (e) => {
-    if (isZooming) return;
-    setIsZooming(true);
-    // 무한 줌을 시각화하기 위해 새로운 이미지 호출
-    fetchNewImage('color-texture').then(() => {
-      setTimeout(() => setIsZooming(false), 1500);
-    });
-  };
-
-  // --- 기존 로직 (Home 시퀀스 등) 유지 ---
+  // --- 타이머 & 시퀀스 ---
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
@@ -136,25 +150,44 @@ function App() {
     return () => clearInterval(timer);
   }, [mode, view]);
 
-  // --- 렌더링 함수들 ---
+  useEffect(() => {
+    const reset = () => { subPageActivityTime.current = Date.now(); };
+    window.addEventListener('mousemove', reset);
+    window.addEventListener('touchstart', reset);
+    return () => {
+      window.removeEventListener('mousemove', reset);
+      window.removeEventListener('touchstart', reset);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (view === 'home' && mode !== 'static') {
+      const interval = setInterval(() => {
+        moveLogos();
+        fetchNewImage(inputText || 'minimal');
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [mode, view, moveLogos, inputText]);
+
+  // --- 렌더링 ---
   const renderNav = () => (
     <nav className="top-nav">
       <button className={view === 'about' ? 'active' : ''} onClick={() => setView('about')}>ABOUT</button>
       <button className={view === 'identity' ? 'active' : ''} onClick={() => setView('identity')}>IDENTITY</button>
       <button className={view === 'objects' ? 'active' : ''} onClick={() => setView('objects')}>OBJECTS</button>
-      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage('vivid'); }}>EVERYTHING</button>
+      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage('color'); }}>EVERYTHING</button>
     </nav>
   );
 
   return (
     <div className="app-root-container">
-      {/* 1. HOME VIEW */}
       {view === 'home' && (
         <div className="page-home">
           <div className="viewport">
             <div className="main-grid-wrapper">
               <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}>
-                <img src="/assets/initial-grid.png" alt="Static" />
+                <img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" />
               </div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map((node) => (
@@ -180,8 +213,8 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              <form onSubmit={(e) => e.preventDefault()} className="footer-form">
-                <input value={inputText} onChange={(e) => { setInputText(e.target.value); lastInteractionTime.current = Date.now(); if (mode === 'static' && e.target.value !== '') { setMode('interactive'); fetchNewImage(e.target.value); } }} placeholder="TYPE TO START" />
+              <form onSubmit={(e) => { e.preventDefault(); fetchNewImage(inputText); }} className="footer-form">
+                <input value={inputText} onChange={(e) => handleHomeInteraction(e.target.value)} placeholder="TYPE TO START" inputMode="text" />
               </form>
               {mode !== 'static' && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
@@ -189,13 +222,12 @@ function App() {
         </div>
       )}
 
-      {/* 2. SUB PAGES (About, Identity, Objects) */}
       {(view === 'about' || view === 'identity' || view === 'objects') && (
         <div className="page-sub">
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Design System Exploration for {view}.</p>
+            <p className="sub-desc">Experimental Design Systems for {view}.</p>
           </div>
           <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}>
             <img src="/assets/logo-reference.png" alt="Home" />
@@ -203,25 +235,22 @@ function App() {
         </div>
       )}
 
-      {/* 3. EVERYTHING VIEW (Halftone Explorer) */}
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
           {renderNav()}
-          <canvas ref={canvasRef} onClick={handleEverythingClick} />
-          
+          <canvas ref={canvasRef} onClick={() => {
+            if (isZooming) return;
+            setIsZooming(true);
+            fetchNewImage('texture').then(() => setTimeout(() => setIsZooming(false), 1500));
+          }} />
           <div className="halftone-controls">
             <span>DENSITY</span>
-            <input 
-              type="range" min="5" max="50" step="1" 
-              value={dotSize} 
-              onChange={(e) => setDotSize(parseInt(e.target.value))} 
-            />
+            <input type="range" min="8" max="50" value={dotSize} onChange={(e) => setDotSize(parseInt(e.target.value))} />
           </div>
-
           <div className="home-back-btn" onClick={() => setView('home')}>
             <img src="/assets/logo-reference.png" alt="Home" />
           </div>
-          <div className="everything-hint">CLICK ANYWHERE TO ZOOM INTO COLOR</div>
+          <div className="everything-hint">CLICK TO ZOOM INTO EVERYTHING</div>
         </div>
       )}
     </div>
