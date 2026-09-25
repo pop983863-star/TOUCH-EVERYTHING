@@ -198,3 +198,80 @@ input {
 .clickable { cursor: pointer !important; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* 기존 스타일 모두 유지하고 아래 내용 추가 */
+
+.page-everything {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease;
+}
+
+/* 줌인 효과 애니메이션 */
+.zooming canvas {
+  transform: scale(8);
+  filter: blur(10px);
+  opacity: 0;
+}
+
+/* 망점 조절 바 (하단 중앙) */
+.halftone-controls {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 110;
+}
+
+.halftone-controls span {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #888;
+}
+
+.halftone-controls input[type="range"] {
+  width: 200px;
+  -webkit-appearance: none;
+  background: #eee;
+  height: 1px;
+  outline: none;
+}
+
+.halftone-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #000;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.everything-hint {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: #bbb;
+  letter-spacing: 0.1em;
+}
+
+/* 네비게이션 active 상태 */
+.top-nav button.active {
+  color: #000 !important;
+  border-bottom: 1px solid #000;
+}
