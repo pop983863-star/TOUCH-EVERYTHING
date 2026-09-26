@@ -54,7 +54,7 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/scenery/1200/800`);
     }
   };
 
@@ -105,6 +105,7 @@ function App() {
 
   useEffect(() => { if (view === 'everything') drawHalftone(); }, [drawHalftone, view]);
 
+  // 타이머 시퀀스 및 자동 복귀
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
@@ -153,14 +154,13 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [수정] 중앙 정렬 유지 및 언더바 제거된 입력창 */}
               <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-label">TOUCH</span>
                 <span className="editorial-comma">,</span>
                 <div className="flexible-input-box">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
                   <span className="ghost-measure">{inputText}</span>
-                  <div className="editorial-cursor"></div>
+                  <div className="custom-cursor"></div>
                 </div>
               </div>
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
@@ -174,7 +174,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Design System for {view}.</p>
+            <p className="sub-desc">Experimental Design Systems for {view}.</p>
           </div>
           <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
@@ -188,7 +188,7 @@ function App() {
             const x = Math.floor(e.clientX - rect.left);
             const y = Math.floor(e.clientY - rect.top);
             const data = imageBuffer.current.data;
-            const i = (Math.floor(y) * canvasRef.current.width + Math.floor(x)) * 4;
+            const i = (y * canvasRef.current.width + x) * 4;
             const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
             setSelectedColor(hex); setIsZooming(true);
             fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500); });
@@ -200,7 +200,7 @@ function App() {
             </div>
           </div>
           <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
         </div>
       )}
     </div>
