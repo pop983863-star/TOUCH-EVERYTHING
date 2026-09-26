@@ -44,12 +44,9 @@ function App() {
     });
   };
 
-  // 큐레이션(명예의 전당) 이미지 우선 fetch
   const fetchNewImage = async (query = '', color = null) => {
     try {
-      let url = `/api/images?q=${encodeURIComponent(query)}`;
-      if (color) url += `&color=${encodeURIComponent(color)}`;
-      const res = await fetch(url);
+      const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
       if (data.images && data.images.length > 0) {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
@@ -154,17 +151,26 @@ function App() {
               </div>
             </div>
           </div>
+          
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* 가변 너비 중앙 정렬 입력창 (언더바 없음) */}
-              <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
+              {/* [수정] 텍스트가 잘리지 않고 중앙 정렬을 유지하는 가변 입력 영역 */}
+              <div className={`editorial-input-block ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-label">TOUCH</span>
                 <span className="editorial-comma">,</span>
-                <div className="flexible-input-box">
-                  <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
-                  {/* ghost-measure: 인풋 가시성 확보를 위해 글자만 차지하고 투명하게 유지 */}
-                  <span className="ghost-measure">{inputText}</span>
-                  <div className="custom-cursor"></div>
+                <div className="flexible-input-container">
+                  <input 
+                    ref={inputRef}
+                    value={inputText}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    onChange={e => handleHomeInteraction(e.target.value)}
+                    autoComplete="off"
+                    spellCheck="false"
+                  />
+                  {/* 글자 길이에 맞춰 너비를 벌려주는 투명 장치 (중복 렌더링 없음) */}
+                  <span className="ghost-width-measure">{inputText}</span>
+                  <div className="editorial-cursor"></div>
                 </div>
               </div>
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
@@ -204,7 +210,7 @@ function App() {
             </div>
           </div>
           <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
-            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+             {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
           </div>
           <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
         </div>
