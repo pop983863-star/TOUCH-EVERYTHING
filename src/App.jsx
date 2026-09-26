@@ -153,12 +153,13 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [수정] 텍스트 너비에 따라 확장되지만 항상 정중앙을 유지하는 인터랙티브 입력창 */}
+              {/* [수정] 너비 제한을 완전히 없앤 가변형 중앙 정렬 입력창 */}
               <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-label">TOUCH</span>
                 <span className="editorial-comma">,</span>
                 <div className="flexible-input-box">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
+                  {/* ghost-measure: 텍스트 길이에 따라 부모 박스를 밀어내어 가변 너비 구현 */}
                   <span className="ghost-measure">{inputText}</span>
                   <div className="editorial-cursor"></div>
                 </div>
@@ -188,20 +189,21 @@ function App() {
             const x = Math.floor(e.clientX - rect.left);
             const y = Math.floor(e.clientY - rect.top);
             const data = imageBuffer.current.data;
-            const i = (y * canvasRef.current.width + x) * 4;
+            const i = (Math.floor(y) * canvasRef.current.width + Math.floor(x)) * 4;
             const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
             setSelectedColor(hex); setIsZooming(true);
             fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500); });
           }} />
+          
+          {/* [수정] 덴시티 바가 화이트 박스 내부로 완벽히 포함됨 */}
           <div className="halftone-controls-wrapper">
             <div className="halftone-box">
               <span>DENSITY</span>
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
-            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
-          </div>
+
+          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
           <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
         </div>
       )}
