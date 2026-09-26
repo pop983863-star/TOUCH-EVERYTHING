@@ -153,7 +153,7 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [수정] 중앙 정렬 유지 및 언더바 제거된 입력창 */}
+              {/* [수정] 텍스트 너비에 따라 확장되지만 항상 정중앙을 유지하는 인터랙티브 입력창 */}
               <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-label">TOUCH</span>
                 <span className="editorial-comma">,</span>
@@ -188,7 +188,7 @@ function App() {
             const x = Math.floor(e.clientX - rect.left);
             const y = Math.floor(e.clientY - rect.top);
             const data = imageBuffer.current.data;
-            const i = (Math.floor(y) * canvasRef.current.width + Math.floor(x)) * 4;
+            const i = (y * canvasRef.current.width + x) * 4;
             const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
             setSelectedColor(hex); setIsZooming(true);
             fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500); });
@@ -199,8 +199,10 @@ function App() {
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
+            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+          </div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
         </div>
       )}
     </div>
