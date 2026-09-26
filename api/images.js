@@ -4,41 +4,45 @@ export default async function handler(req, res) {
 
   if (!apiKey) return res.status(500).json({ error: "API Key missing" });
 
-  // 1. 차단 키워드
-  const dangerZone = ['sex', 'sexy', 'nude', 'adult', 'horror', 'scary', 'blood', 'hospital', 'medical', 'dead', 'gore'];
+  const dangerZone = [
+    'sex', 'sexy', 'nude', 'adult', 'porn', 'horror', 'scary', 'blood', 
+    'hospital', 'clinic', 'medical', 'doctor', 'surgery', 'patient', 'dentist',
+    'gore', 'dead', 'creepy', 'pain', 'kill', 'zombie', 'weapon'
+  ];
+
   let userQuery = (q || '').toLowerCase().trim();
   const isDangerous = dangerZone.some(word => userQuery.includes(word));
   
-  // 2. 인물 사진을 피하기 위한 강력한 보조 키워드 (사람, 카메라 등 배제)
-  const exclusion = " -person -people -man -woman -photographer -camera -face -holding";
-  
   let finalQuery;
   if (!userQuery || isDangerous) {
-    // 검색어가 없거나 위험할 때 평화로운 풍경 중 랜덤 선택
-    const landscapePicks = ['serene landscape', 'misty mountain', 'calm ocean', 'forest morning', 'minimal architecture', 'clear sky'];
+    // [수정] 검색어가 없거나 위험할 때 풍경 이미지 키워드 중 랜덤 선택
+    const landscapePicks = [
+      'serene mountain landscape', 
+      'calm ocean horizon', 
+      'dense misty forest', 
+      'scenic valley nature', 
+      'beautiful sunset clouds',
+      'arctic ice landscape',
+      'autumn forest hills'
+    ];
     finalQuery = landscapePicks[Math.floor(Math.random() * landscapePicks.length)];
   } else {
-    // 사용자 검색어에 배제 필터 적용
-    finalQuery = userQuery + exclusion;
+    finalQuery = userQuery + " professional photography";
   }
 
   try {
-    // 매번 다른 페이지를 불러와 중복 방지 (1~15페이지 랜덤)
-    const randomPage = Math.floor(Math.random() * 15) + 1;
-    let apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(finalQuery)}&per_page=25&page=${randomPage}&orientation=landscape`;
-    
+    let apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(finalQuery)}&per_page=20&orientation=landscape`;
     if (color) apiUrl += `&color=${encodeURIComponent(color)}`;
 
     const response = await fetch(apiUrl, { headers: { Authorization: apiKey } });
     const data = await response.json();
     let images = data.photos ? data.photos.map(p => p.src.large) : [];
 
-    // 결과가 너무 적으면 예비용 고품질 사진 추가
     if (images.length < 5) {
       images = [...images, "https://images.pexels.com/photos/2817421/pexels-photo-2817421.jpeg"];
     }
     res.status(200).json({ images });
   } catch (error) {
-    res.status(200).json({ images: [`https://picsum.photos/seed/${Math.random()}/1200/800`] });
+    res.status(200).json({ images: [`https://picsum.photos/seed/landscape/1200/800`] });
   }
 }
