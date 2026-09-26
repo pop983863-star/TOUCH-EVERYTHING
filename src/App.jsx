@@ -151,29 +151,19 @@ function App() {
               </div>
             </div>
           </div>
-          
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [수정] 수평 정렬 가변 입력창 (언더바 완전 제거) */}
-              <div className={`horizontal-input-group ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
+              {/* [수정] 텍스트 입력창 구조 개선: TOUCH와 입력창이 나란히 배치됨 */}
+              <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-label">TOUCH</span>
-                <span className="comma-label">,</span>
-                <div className="flexible-input-wrapper">
-                  <input 
-                    ref={inputRef}
-                    value={inputText}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    onChange={e => handleHomeInteraction(e.target.value)}
-                    autoComplete="off"
-                    spellCheck="false"
-                  />
-                  {/* ghost: 텍스트 너비만 확보하고 보이지 않게 함 (중복 방지) */}
-                  <span className="ghost-text-holder">{inputText}</span>
-                  <div className="editorial-caret"></div>
+                <span className="editorial-comma">,</span>
+                <div className="flexible-input-box">
+                  <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
+                  <span className="ghost-measure">{inputText}</span>
+                  <div className="custom-cursor"></div>
                 </div>
               </div>
-              {(mode !== 'static' || inputText) && <div className="footer-hint-text">TOUCH SYMBOL</div>}
+              {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -209,10 +199,11 @@ function App() {
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
+          {/* [수정] 안내 문구 및 컬러값 표시 */}
           <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
-            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+             {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
           </div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
         </div>
       )}
     </div>
