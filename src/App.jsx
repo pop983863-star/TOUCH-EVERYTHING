@@ -48,7 +48,7 @@ function App() {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
-      if (data.images?.length > 0) {
+      if (data.images && data.images.length > 0) {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
@@ -125,13 +125,22 @@ function App() {
     }
   }, [mode, view, moveLogos, isFocused]);
 
+  const renderNav = () => (
+    <nav className="top-nav">
+      {['about', 'identity', 'objects'].map(v => (
+        <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
+      ))}
+      <button onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
+    </nav>
+  );
+
   return (
     <div className="app-root-container">
       {view === 'home' && (
         <div className="page-home">
           <div className="viewport">
             <div className="main-grid-wrapper">
-              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
+              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map(n => (
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
@@ -144,21 +153,13 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-label">TOUCH</span>
-                <span className="editorial-comma">,</span>
-                <div className="flexible-input-box">
-                  <input 
-                    ref={inputRef}
-                    value={inputText}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    onChange={e => handleHomeInteraction(e.target.value)}
-                    autoComplete="off"
-                    spellCheck="false"
-                  />
-                  <span className="ghost-measure">{inputText}</span>
-                  <div className="custom-cursor"></div>
+              <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
+                <span className="touch-text">TOUCH</span>
+                <span className="comma-text">,</span>
+                <div className="input-field-wrapper">
+                  <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
+                  <span className="input-measure">{inputText}</span>
+                  <div className="editorial-cursor"></div>
                 </div>
               </div>
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
@@ -169,12 +170,7 @@ function App() {
 
       {['about', 'identity', 'objects'].includes(view) && (
         <div className="page-sub">
-          <nav className="top-nav">
-            {['about', 'identity', 'objects'].map(v => (
-              <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
-            ))}
-            <button onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
-          </nav>
+          {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
             <p className="sub-desc">Experimental Design System for {view}.</p>
@@ -192,7 +188,7 @@ function App() {
             const y = Math.floor(e.clientY - rect.top);
             const data = imageBuffer.current.data;
             const i = (y * canvasRef.current.width + x) * 4;
-            const hex = '#' + [data[i], data[i+1], data[i+2]].map(x => x.toString(16).padStart(2, '0')).join('');
+            const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
             setSelectedColor(hex); setIsZooming(true);
             fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500); });
           }} />
@@ -203,7 +199,7 @@ function App() {
             </div>
           </div>
           <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
       )}
     </div>
