@@ -34,7 +34,6 @@ function App() {
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
-  const inputRef = useRef(null);
 
   const preloadImage = (url) => {
     return new Promise((resolve) => {
@@ -48,13 +47,13 @@ function App() {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
-      if (data.images && data.images.length > 0) {
+      if (data.images?.length > 0) {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/landscape/1200/800`);
     }
   };
 
@@ -82,8 +81,10 @@ function App() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const img = new Image(); img.crossOrigin = "Anonymous"; img.src = currentBgImage;
+
     img.onload = () => {
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
       const x = (canvas.width / 2) - (img.width / 2) * scale;
       const y = (canvas.height / 2) - (img.height / 2) * scale;
@@ -105,22 +106,46 @@ function App() {
 
   useEffect(() => { if (view === 'everything') drawHalftone(); }, [drawHalftone, view]);
 
+  const handleHalftoneClick = (e) => {
+    if (isZooming || !imageBuffer.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = Math.floor(e.clientX - rect.left);
+    const y = Math.floor(e.clientY - rect.top);
+    const data = imageBuffer.current.data;
+    const i = (y * canvasRef.current.width + x) * 4;
+    const rgbToHex = (r, g, b) => '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+    const hex = rgbToHex(data[i], data[i+1], data[i+2]);
+    setSelectedColor(hex);
+    setIsZooming(true);
+    fetchNewImage(inputText, hex).then(() => {
+      setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500);
+    });
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
-      if (view === 'home' && !isFocused) {
+      if (view === 'home') {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 12) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } }
-        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
+        if (!isFocused) {
+          if (mode === 'interactive' && diff >= 12) {
+            setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES);
+          } else if (mode === 'static' && diff >= 25 && diff < 55) {
+            if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); }
+          } else if (mode === 'slideshow' && diff >= 55) {
+            setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES);
+          }
+        }
+      } else {
+        if ((now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view, isFocused]);
 
   useEffect(() => {
     if (view === 'home' && mode !== 'static' && !isFocused) {
-      const interval = setInterval(() => { moveLogos(); if (mode === 'slideshow') fetchNewImage(''); }, 7500);
+      const interval = setInterval(() => { moveLogos(); if (mode === 'slideshow') fetchNewImage(''); }, 7000);
       return () => clearInterval(interval);
     }
   }, [mode, view, moveLogos, isFocused]);
@@ -130,8 +155,17 @@ function App() {
       {['about', 'identity', 'objects'].map(v => (
         <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
       ))}
-      <button onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
+      <button className={view === 'everything' ? 'active' : ''} onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
     </nav>
+  );
+
+  const HomeLogo = () => (
+    <div className="home-back-btn" onClick={() => {
+      if (view === 'everything') setView(lastSubView);
+      else { setView('home'); setMode('static'); }
+    }}>
+      <img src="/assets/logo-reference.png" alt="Logo" />
+    </div>
   );
 
   return (
@@ -153,14 +187,12 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-text">TOUCH</span>
-                <span className="comma-text">,</span>
-                <div className="input-field-wrapper">
-                  <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
-                  <span className="input-measure">{inputText}</span>
-                  <div className="editorial-cursor"></div>
-                </div>
+              <div className={`input-wrapper ${isFocused || inputText ? 'active' : ''}`}>
+                <span className="touch-label">TOUCH</span>
+                <form onSubmit={e => { e.preventDefault(); fetchNewImage(inputText); }} className="footer-form">
+                  <span className="comma">{ (isFocused || inputText) ? ',' : '' }</span>
+                  <input value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} placeholder="" inputMode="text" />
+                </form>
               </div>
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
@@ -173,33 +205,25 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Design System for {view}.</p>
+            <p className="sub-desc">Experimental Brand Systems for {view}.</p>
           </div>
-          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
+          <HomeLogo />
         </div>
       )}
 
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
-          <canvas ref={canvasRef} onClick={(e) => {
-            if (isZooming || !imageBuffer.current) return;
-            const rect = canvasRef.current.getBoundingClientRect();
-            const x = Math.floor(e.clientX - rect.left);
-            const y = Math.floor(e.clientY - rect.top);
-            const data = imageBuffer.current.data;
-            const i = (y * canvasRef.current.width + x) * 4;
-            const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
-            setSelectedColor(hex); setIsZooming(true);
-            fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500); });
-          }} />
+          <canvas ref={canvasRef} onClick={handleHalftoneClick} />
           <div className="halftone-controls-wrapper">
             <div className="halftone-box">
               <span>DENSITY</span>
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
+            {selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+          </div>
+          <HomeLogo />
         </div>
       )}
     </div>
