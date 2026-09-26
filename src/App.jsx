@@ -19,8 +19,9 @@ const generateGridNodes = () => {
 
 function App() {
   const [view, setView] = useState('home'); 
-  const [lastSubView, setLastSubView] = useState('about'); 
+  const [lastSubView, setLastSubView] = useState('about');
   const [inputText, setInputText] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const [nodes] = useState(generateGridNodes());
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
@@ -28,6 +29,7 @@ function App() {
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
+  
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
@@ -36,29 +38,22 @@ function App() {
   const preloadImage = (url) => {
     return new Promise((resolve) => {
       const img = new Image();
-      img.src = url;
-      img.crossOrigin = "Anonymous";
-      img.onload = () => resolve(url);
-      img.onerror = () => resolve(url);
+      img.src = url; img.crossOrigin = "Anonymous";
+      img.onload = () => resolve(url); img.onerror = () => resolve(url);
     });
   };
 
   const fetchNewImage = async (query = '', color = null) => {
     try {
-      // 쿼리 파라미터를 조합할 때 encodeURIComponent를 사용하여 특수문자 오류 방지
-      let url = `/api/images?q=${encodeURIComponent(query)}`;
-      if (color) url += `&color=${encodeURIComponent(color)}`;
-      
-      const res = await fetch(url);
+      const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
-      
-      if (data.images && data.images.length > 0) {
+      if (data.images?.length > 0) {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/landscape/1200/800`);
     }
   };
 
@@ -85,9 +80,7 @@ function App() {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = currentBgImage;
+    const img = new Image(); img.crossOrigin = "Anonymous"; img.src = currentBgImage;
 
     img.onload = () => {
       canvas.width = window.innerWidth;
@@ -120,7 +113,7 @@ function App() {
     const y = Math.floor(e.clientY - rect.top);
     const data = imageBuffer.current.data;
     const i = (y * canvasRef.current.width + x) * 4;
-    const rgbToHex = (r, g, b) => '#' + [r, g, b].map(val => val.toString(16).padStart(2, '0')).join('');
+    const rgbToHex = (r, g, b) => '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
     const hex = rgbToHex(data[i], data[i+1], data[i+2]);
     setSelectedColor(hex);
     setIsZooming(true);
@@ -134,26 +127,28 @@ function App() {
       const now = Date.now();
       if (view === 'home') {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 10) {
-          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES);
-        } else if (mode === 'static' && diff >= 20 && diff < 50) {
-          if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); }
-        } else if (mode === 'slideshow' && diff >= 50) {
-          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES);
+        if (!isFocused) {
+          if (mode === 'interactive' && diff >= 12) {
+            setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES);
+          } else if (mode === 'static' && diff >= 25 && diff < 55) {
+            if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); }
+          } else if (mode === 'slideshow' && diff >= 55) {
+            setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES);
+          }
         }
       } else {
         if ((now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [mode, view]);
+  }, [mode, view, isFocused]);
 
   useEffect(() => {
-    if (view === 'home' && mode !== 'static') {
-      const interval = setInterval(() => { moveLogos(); fetchNewImage(inputText); }, 5000);
+    if (view === 'home' && mode !== 'static' && !isFocused) {
+      const interval = setInterval(() => { moveLogos(); if (mode === 'slideshow') fetchNewImage(''); }, 7000);
       return () => clearInterval(interval);
     }
-  }, [mode, view, moveLogos, inputText]);
+  }, [mode, view, moveLogos, isFocused]);
 
   const renderNav = () => (
     <nav className="top-nav">
@@ -169,7 +164,7 @@ function App() {
       if (view === 'everything') setView(lastSubView);
       else { setView('home'); setMode('static'); }
     }}>
-      <img src="/assets/logo-reference.png" alt="Home" />
+      <img src="/assets/logo-reference.png" alt="Logo" />
     </div>
   );
 
@@ -192,10 +187,14 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              <form onSubmit={e => { e.preventDefault(); fetchNewImage(inputText); }} className="footer-form">
-                <input value={inputText} onChange={e => handleHomeInteraction(e.target.value)} placeholder="TYPE TO START" inputMode="text" />
-              </form>
-              {mode !== 'static' && <div className="footer-hint">TOUCH SYMBOL</div>}
+              <div className={`input-wrapper ${isFocused || inputText ? 'active' : ''}`}>
+                <span className="touch-label">TOUCH</span>
+                <form onSubmit={e => { e.preventDefault(); fetchNewImage(inputText); }} className="footer-form">
+                  <span className="comma">{ (isFocused || inputText) ? ',' : '' }</span>
+                  <input value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} placeholder="" inputMode="text" />
+                </form>
+              </div>
+              {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -206,7 +205,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Design System for {view}.</p>
+            <p className="sub-desc">Experimental Brand Systems for {view}.</p>
           </div>
           <HomeLogo />
         </div>
