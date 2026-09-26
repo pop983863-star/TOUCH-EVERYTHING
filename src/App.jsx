@@ -153,7 +153,6 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* --- [수정] 언더바가 제거된 가변형 중앙 정렬 입력창 --- */}
               <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-text">TOUCH</span>
                 <span className="comma-text">,</span>
