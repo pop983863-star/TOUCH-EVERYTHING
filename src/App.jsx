@@ -154,11 +154,11 @@ function App() {
           
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [수정] 텍스트가 잘리지 않고 중앙 정렬을 유지하는 가변 입력 영역 */}
-              <div className={`editorial-input-block ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
+              {/* [수정] 수평 정렬 가변 입력창 (언더바 완전 제거) */}
+              <div className={`horizontal-input-group ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-label">TOUCH</span>
-                <span className="editorial-comma">,</span>
-                <div className="flexible-input-container">
+                <span className="comma-label">,</span>
+                <div className="flexible-input-wrapper">
                   <input 
                     ref={inputRef}
                     value={inputText}
@@ -168,12 +168,12 @@ function App() {
                     autoComplete="off"
                     spellCheck="false"
                   />
-                  {/* 글자 길이에 맞춰 너비를 벌려주는 투명 장치 (중복 렌더링 없음) */}
-                  <span className="ghost-width-measure">{inputText}</span>
-                  <div className="editorial-cursor"></div>
+                  {/* ghost: 텍스트 너비만 확보하고 보이지 않게 함 (중복 방지) */}
+                  <span className="ghost-text-holder">{inputText}</span>
+                  <div className="editorial-caret"></div>
                 </div>
               </div>
-              {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
+              {(mode !== 'static' || inputText) && <div className="footer-hint-text">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -210,9 +210,9 @@ function App() {
             </div>
           </div>
           <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
-             {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
           </div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
       )}
     </div>
