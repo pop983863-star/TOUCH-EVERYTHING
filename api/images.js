@@ -1,54 +1,44 @@
-// api/images.js
 export default async function handler(req, res) {
   const { q, color } = req.query;
   const apiKey = process.env.PEXELS_API_KEY;
 
   if (!apiKey) return res.status(500).json({ error: "API Key missing" });
 
+  // 1. 차단 키워드
+  const dangerZone = ['sex', 'sexy', 'nude', 'adult', 'horror', 'scary', 'blood', 'hospital', 'medical', 'dead', 'gore'];
   let userQuery = (q || '').toLowerCase().trim();
-
-  // 1. 추상적인 인사말이나 짧은 단어를 시각적 실체가 있는 풍경 단어로 매핑
-  const queryMap = {
-    'hi': 'sunrise landscape',
-    'hello': 'open window view',
-    'hey': 'morning light texture',
-    'day': 'bright horizon',
-    'sky': 'clear blue sky background' // sky 단독 대신 background 추가
-  };
-
-  let processedQuery = queryMap[userQuery] || userQuery;
-
-  // 2. 인물이 절대 나올 수 없는 "배경/사물용" 접미사 강제 추가
-  // 'person'을 빼는게 아니라 'background', 'texture', 'empty'를 더해서 사람을 밀어냅니다.
-  const forcedSafeSuffix = " empty no-people background texture landscape";
+  const isDangerous = dangerZone.some(word => userQuery.includes(word));
+  
+  // 2. 인물 사진을 피하기 위한 강력한 보조 키워드 (사람, 카메라 등 배제)
+  const exclusion = " -person -people -man -woman -photographer -camera -face -holding";
+  
+  let finalQuery;
+  if (!userQuery || isDangerous) {
+    // 검색어가 없거나 위험할 때 평화로운 풍경 중 랜덤 선택
+    const landscapePicks = ['serene landscape', 'misty mountain', 'calm ocean', 'forest morning', 'minimal architecture', 'clear sky'];
+    finalQuery = landscapePicks[Math.floor(Math.random() * landscapePicks.length)];
+  } else {
+    // 사용자 검색어에 배제 필터 적용
+    finalQuery = userQuery + exclusion;
+  }
 
   try {
-    const randomPage = Math.floor(Math.random() * 15) + 1; // 중복 방지 오프셋
-    let apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(processedQuery + forcedSafeSuffix)}&per_page=30&page=${randomPage}&orientation=landscape`;
+    // 매번 다른 페이지를 불러와 중복 방지 (1~15페이지 랜덤)
+    const randomPage = Math.floor(Math.random() * 15) + 1;
+    let apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(finalQuery)}&per_page=25&page=${randomPage}&orientation=landscape`;
     
     if (color) apiUrl += `&color=${encodeURIComponent(color)}`;
 
     const response = await fetch(apiUrl, { headers: { Authorization: apiKey } });
     const data = await response.json();
-    
-    // 3. 결과 필터링 (이미지 제목이나 설명에 사람 관련 단어가 있으면 코드에서 한 번 더 거름)
-    const personKeywords = ['person', 'photographer', 'man', 'woman', 'girl', 'boy', 'camera', 'model', 'holding'];
-    
-    let filteredImages = data.photos ? data.photos.filter(photo => {
-      // 사진 작가 이름이나 메타데이터에 '카메라/작가' 키워드가 너무 강한 것들을 제외
-      const alt = (photo.alt || '').toLowerCase();
-      return !personKeywords.some(badWord => alt.includes(badWord));
-    }).map(p => p.src.large) : [];
+    let images = data.photos ? data.photos.map(p => p.src.large) : [];
 
-    // 필터링 후 이미지가 너무 적으면 Curated(검증된 사진)로 대체
-    if (filteredImages.length < 5) {
-      const curatedRes = await fetch(`https://api.pexels.com/v1/curated?per_page=20&page=${randomPage}`);
-      const curatedData = await curatedRes.json();
-      filteredImages = curatedData.photos.map(p => p.src.large);
+    // 결과가 너무 적으면 예비용 고품질 사진 추가
+    if (images.length < 5) {
+      images = [...images, "https://images.pexels.com/photos/2817421/pexels-photo-2817421.jpeg"];
     }
-
-    res.status(200).json({ images: filteredImages });
+    res.status(200).json({ images });
   } catch (error) {
-    res.status(200).json({ images: [`https://picsum.photos/seed/nature/1200/800`] });
+    res.status(200).json({ images: [`https://picsum.photos/seed/${Math.random()}/1200/800`] });
   }
 }
