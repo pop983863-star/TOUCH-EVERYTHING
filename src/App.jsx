@@ -25,10 +25,10 @@ function App() {
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
+  
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
-  
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
@@ -37,16 +37,19 @@ function App() {
   const preloadImage = (url) => {
     return new Promise((resolve) => {
       const img = new Image();
-      img.src = url;
-      img.crossOrigin = "Anonymous";
-      img.onload = () => resolve(url);
-      img.onerror = () => resolve(url);
+      img.src = url; img.crossOrigin = "Anonymous";
+      img.onload = () => resolve(url); img.onerror = () => resolve(url);
     });
   };
 
+  // --- [개선] 사용자의 입력을 그대로 전달하는 이미지 검색 ---
   const fetchNewImage = async (query = '', color = null) => {
+    // 텍스트가 있으면 그대로 쓰고, 없으면 무작위 단어 (다양성 부여)
+    const randomDefaults = ['graphic', 'pattern', 'minimal', 'object', 'pop art', 'modern'];
+    const finalQuery = query.trim() !== '' ? query : randomDefaults[Math.floor(Math.random() * randomDefaults.length)];
+
     try {
-      let url = `/api/images?q=${encodeURIComponent(query)}`;
+      let url = `/api/images?q=${encodeURIComponent(finalQuery)}`;
       if (color) url += `&color=${encodeURIComponent(color)}`;
       
       const res = await fetch(url);
@@ -84,20 +87,19 @@ function App() {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = currentBgImage;
+    const img = new Image(); img.crossOrigin = "Anonymous"; img.src = currentBgImage;
 
     img.onload = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
       const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
       const x = (canvas.width / 2) - (img.width / 2) * scale;
       const y = (canvas.height / 2) - (img.height / 2) * scale;
       ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
       const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
       imageBuffer.current = imageDataObj;
-      if (dotSize <= 1) return;
+
+      if (dotSize <= 1) return; // 덴시티 1일 때 원본 이미지 노출
+
       const data = imageDataObj.data;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let h = 0; h < canvas.height; h += dotSize) {
@@ -123,6 +125,7 @@ function App() {
     const hex = rgbToHex(data[i], data[i+1], data[i+2]);
     setSelectedColor(hex);
     setIsZooming(true);
+    // 에브리띵 페이지에서도 입력한 텍스트가 있다면 반영
     fetchNewImage(inputText, hex).then(() => {
       setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500);
     });
@@ -148,16 +151,6 @@ function App() {
   }, [mode, view]);
 
   useEffect(() => {
-    const reset = () => { subPageActivityTime.current = Date.now(); };
-    window.addEventListener('mousemove', reset);
-    window.addEventListener('touchstart', reset);
-    return () => {
-      window.removeEventListener('mousemove', reset);
-      window.removeEventListener('touchstart', reset);
-    };
-  }, []);
-
-  useEffect(() => {
     if (view === 'home' && mode !== 'static') {
       const interval = setInterval(() => { moveLogos(); fetchNewImage(inputText); }, 5000);
       return () => clearInterval(interval);
@@ -178,7 +171,7 @@ function App() {
       if (view === 'everything') setView(lastSubView);
       else { setView('home'); setMode('static'); }
     }}>
-      <img src="/assets/logo-reference.png" alt="Home" />
+      <img src="/assets/logo-reference.png" alt="Logo" />
     </div>
   );
 
@@ -188,7 +181,7 @@ function App() {
         <div className="page-home">
           <div className="viewport">
             <div className="main-grid-wrapper">
-              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" /></div>
+              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map(n => (
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
@@ -215,7 +208,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Design System for {view}.</p>
+            <p className="sub-desc">Experimental Brand Systems for {view}.</p>
           </div>
           <HomeLogo />
         </div>
