@@ -13,12 +13,18 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.app-root-container { width: 100vw; height: 100vh; display: flex; position: relative; overflow: hidden; }
+.app-root-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
-/* --- GRID & LAYERS --- */
-.page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
-.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
-.main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
+/* --- GRID & VIEWPORT --- */
+.page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
+.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; z-index: 1; }
+
+.main-grid-wrapper {
+  position: relative;
+  width: var(--grid-w);
+  height: var(--grid-h);
+  transform-origin: center center;
+}
 
 .layer-static, .layer-dynamic {
   position: absolute; top: 0; left: 0;
@@ -42,20 +48,28 @@ body {
 }
 .logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
 
-/* --- [수정] 언더바가 없는 가변형 푸터 입력창 --- */
-.footer-layout { height: 120px; display: flex; justify-content: center; align-items: flex-start; width: 100%; position: absolute; bottom: 80px; }
+/* --- [수정] 푸터 위치 및 클릭 안정성 강화 --- */
+.footer-layout { 
+  height: 120px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: flex-start; 
+  width: 100%; 
+  position: absolute; 
+  bottom: 60px; /* 화면 아래에서 60px 띄움 */
+  z-index: 100; /* 그리드보다 위로 올려서 클릭 가능하게 함 */
+}
+
 .footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
 .dynamic-input-area {
   display: flex; align-items: center; justify-content: center;
-  /* border-bottom 제거됨 */
   padding: 5px 0; min-width: 50px; cursor: text;
   transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .touch-text { font-size: 9px; letter-spacing: 0.25em; color: #111; transition: all 0.6s ease; }
 .comma-text { font-size: 9px; color: #111; width: 0; opacity: 0; transition: all 0.4s ease; display: inline-block; overflow: hidden; }
-
 .dynamic-input-area.is-active .comma-text { width: 8px; opacity: 1; margin-right: 4px; }
 
 .input-field-wrapper { position: relative; display: flex; align-items: center; }
@@ -68,19 +82,17 @@ input {
   font-size: 16px; color: #999;
   text-transform: uppercase; letter-spacing: 0.15em;
   transform: scale(0.5625); transform-origin: left center;
-  z-index: 2;
+  z-index: 5; /* 인풋을 최상단으로 */
 }
 
 .input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.15em; text-transform: uppercase; min-width: 1px; }
-
-/* 커서만 노출하여 입력 상태임을 강조 */
 .editorial-cursor { width: 1px; height: 10px; background: #111; margin-left: 1px; animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
 .footer-hint { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 3s forwards; }
 @keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- EVERYTHING & SUBPAGES (기존 유지) --- */
+/* --- EVERYTHING & OTHERS --- */
 .page-everything { background: #fff; cursor: crosshair; position: relative; }
 canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease; }
 .zooming canvas { transform: scale(12); filter: blur(30px); opacity: 0; }
@@ -109,6 +121,7 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
   .main-grid-wrapper { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.72); }
   .top-nav { gap: 20px; top: 40px; width: 100%; justify-content: center; }
   .sub-title { font-size: 32px; }
+  .dynamic-input-area { max-width: 80vw; }
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
