@@ -2,44 +2,40 @@ export default async function handler(req, res) {
   const { q, color } = req.query;
   const apiKey = process.env.PEXELS_API_KEY;
 
-  if (!apiKey) return res.status(500).json({ error: "API Key missing" });
+  if (!apiKey) return res.status(500).json({ error: "Missing API Key" });
 
-  // 1. 금지어 발견 시 즉시 'curated' 모드로 전환하기 위한 리스트
-  const forbidden = ['horror', 'scary', 'blood', 'gore', 'dead', 'ghost', 'kill', 'creepy', 'dark', 'pain'];
+  // 1. 진짜 위험한 것만 걸러내는 최소한의 블랙리스트
+  const forbidden = ['horror', 'gore', 'dead', 'blood', 'zombie', 'ghost', 'pain', 'scary'];
   const query = (q || '').toLowerCase();
   const isUnsafe = forbidden.some(word => query.includes(word));
 
   try {
     let apiUrl;
-    
-    // 2. 사용자의 단어가 안전하고 존재한다면 search, 아니면 curated(검증된 사진들) 호출
+    // 2. 검색 엔진에게 "이 단어들이 포함된 태그는 결과에서 빼줘"라고만 요청 (Negative Filter)
+    // 사용자 검색어에 영향을 주지 않으면서 필터링만 수행
+    const strictExclusion = " -horror -gore -blood -dead -scary -creepy";
+
     if (q && !isUnsafe) {
-      // 긍정적인 단어(serene, beautiful)만 덧붙여서 분위기를 밝게 유도
-      apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q + " serene beautiful")}&per_page=15&orientation=landscape`;
+      // 사용자의 검색어 그대로 사용 (다양성 확보)
+      apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q + strictExclusion)}&per_page=20&orientation=landscape`;
     } else {
-      // 위험한 단어거나 입력이 없을 때: Pexels에서 엄선한 고화질 안전 사진(Curated)만 가져옴
-      apiUrl = `https://api.pexels.com/v1/curated?per_page=15`;
+      // 금지어거나 비어있을 때만 무작위 고화질 이미지
+      apiUrl = `https://api.pexels.com/v1/curated?per_page=20`;
     }
 
-    if (color) {
-      // 컬러 탐험 시에는 컬러 파라미터 추가
-      apiUrl += `&color=${encodeURIComponent(color)}`;
-    }
+    if (color) apiUrl += `&color=${encodeURIComponent(color)}`;
 
-    const response = await fetch(apiUrl, {
-      headers: { Authorization: apiKey }
-    });
+    const response = await fetch(apiUrl, { headers: { Authorization: apiKey } });
     const data = await response.json();
     
     let images = data.photos ? data.photos.map(p => p.src.large) : [];
 
-    // 결과가 0개일 경우를 대비한 최후의 안전한 자연 이미지
     if (images.length === 0) {
-      images = [`https://images.pexels.com/photos/2817421/pexels-photo-2817421.jpeg?auto=compress&cs=tinysrgb&w=1200`];
+      images = [`https://picsum.photos/seed/${Math.random()}/1200/800`];
     }
 
     res.status(200).json({ images });
   } catch (error) {
-    res.status(200).json({ images: [`https://picsum.photos/seed/nature/1200/800`] });
+    res.status(200).json({ images: [`https://picsum.photos/seed/safe/1200/800`] });
   }
 }
