@@ -25,7 +25,6 @@ function App() {
   const [mode, setMode] = useState('static'); 
   const [activeIndices, setActiveIndices] = useState(INITIAL_LOGO_INDICES);
   const [currentBgImage, setCurrentBgImage] = useState('');
-  
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -37,30 +36,29 @@ function App() {
   const preloadImage = (url) => {
     return new Promise((resolve) => {
       const img = new Image();
-      img.src = url; img.crossOrigin = "Anonymous";
-      img.onload = () => resolve(url); img.onerror = () => resolve(url);
+      img.src = url;
+      img.crossOrigin = "Anonymous";
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(url);
     });
   };
 
-  // --- [개선] 사용자의 입력을 그대로 전달하는 이미지 검색 ---
   const fetchNewImage = async (query = '', color = null) => {
-    // 텍스트가 있으면 그대로 쓰고, 없으면 무작위 단어 (다양성 부여)
-    const randomDefaults = ['graphic', 'pattern', 'minimal', 'object', 'pop art', 'modern'];
-    const finalQuery = query.trim() !== '' ? query : randomDefaults[Math.floor(Math.random() * randomDefaults.length)];
-
     try {
-      let url = `/api/images?q=${encodeURIComponent(finalQuery)}`;
+      // 쿼리 파라미터를 조합할 때 encodeURIComponent를 사용하여 특수문자 오류 방지
+      let url = `/api/images?q=${encodeURIComponent(query)}`;
       if (color) url += `&color=${encodeURIComponent(color)}`;
       
       const res = await fetch(url);
       const data = await res.json();
+      
       if (data.images && data.images.length > 0) {
         const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
     }
   };
 
@@ -87,19 +85,20 @@ function App() {
     if (view !== 'everything' || !canvasRef.current || !currentBgImage) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const img = new Image(); img.crossOrigin = "Anonymous"; img.src = currentBgImage;
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = currentBgImage;
 
     img.onload = () => {
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
       const x = (canvas.width / 2) - (img.width / 2) * scale;
       const y = (canvas.height / 2) - (img.height / 2) * scale;
       ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
       const imageDataObj = ctx.getImageData(0, 0, canvas.width, canvas.height);
       imageBuffer.current = imageDataObj;
-
-      if (dotSize <= 1) return; // 덴시티 1일 때 원본 이미지 노출
-
+      if (dotSize <= 1) return;
       const data = imageDataObj.data;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let h = 0; h < canvas.height; h += dotSize) {
@@ -121,11 +120,10 @@ function App() {
     const y = Math.floor(e.clientY - rect.top);
     const data = imageBuffer.current.data;
     const i = (y * canvasRef.current.width + x) * 4;
-    const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    const rgbToHex = (r, g, b) => '#' + [r, g, b].map(val => val.toString(16).padStart(2, '0')).join('');
     const hex = rgbToHex(data[i], data[i+1], data[i+2]);
     setSelectedColor(hex);
     setIsZooming(true);
-    // 에브리띵 페이지에서도 입력한 텍스트가 있다면 반영
     fetchNewImage(inputText, hex).then(() => {
       setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500);
     });
@@ -171,7 +169,7 @@ function App() {
       if (view === 'everything') setView(lastSubView);
       else { setView('home'); setMode('static'); }
     }}>
-      <img src="/assets/logo-reference.png" alt="Logo" />
+      <img src="/assets/logo-reference.png" alt="Home" />
     </div>
   );
 
@@ -208,7 +206,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Brand Systems for {view}.</p>
+            <p className="sub-desc">Experimental Design System for {view}.</p>
           </div>
           <HomeLogo />
         </div>
