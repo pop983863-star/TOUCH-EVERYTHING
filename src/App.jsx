@@ -54,7 +54,7 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/scenery/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
     }
   };
 
@@ -105,7 +105,6 @@ function App() {
 
   useEffect(() => { if (view === 'everything') drawHalftone(); }, [drawHalftone, view]);
 
-  // 타이머 시퀀스 및 자동 복귀
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
@@ -154,13 +153,13 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              <div className={`editorial-input-wrapper ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-label">TOUCH</span>
-                <span className="editorial-comma">,</span>
-                <div className="flexible-input-box">
+              <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
+                <span className="touch-text">TOUCH</span>
+                <span className="comma-text">,</span>
+                <div className="input-field-wrapper">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
-                  <span className="ghost-measure">{inputText}</span>
-                  <div className="custom-cursor"></div>
+                  <span className="input-measure">{inputText}</span>
+                  <div className="editorial-cursor"></div>
                 </div>
               </div>
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
@@ -174,7 +173,7 @@ function App() {
           {renderNav()}
           <div className="content-area">
             <h1 className="sub-title">{view.toUpperCase()}</h1>
-            <p className="sub-desc">Experimental Design Systems for {view}.</p>
+            <p className="sub-desc">Experimental Design System for {view}.</p>
           </div>
           <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
@@ -200,7 +199,7 @@ function App() {
             </div>
           </div>
           <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Back" /></div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
       )}
     </div>
