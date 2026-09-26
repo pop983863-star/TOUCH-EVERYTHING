@@ -2,40 +2,59 @@ export default async function handler(req, res) {
   const { q, color } = req.query;
   const apiKey = process.env.PEXELS_API_KEY;
 
-  if (!apiKey) return res.status(500).json({ error: "Missing API Key" });
+  if (!apiKey) return res.status(500).json({ error: "API Key missing" });
 
-  // 1. 진짜 위험한 것만 걸러내는 최소한의 블랙리스트
-  const forbidden = ['horror', 'gore', 'dead', 'blood', 'zombie', 'ghost', 'pain', 'scary'];
-  const query = (q || '').toLowerCase();
-  const isUnsafe = forbidden.some(word => query.includes(word));
+  // 1. 아주 넓은 범위의 위험 단어 감지 리스트
+  const dangerZone = [
+    'horror', 'scary', 'blood', 'gore', 'dead', 'ghost', 'kill', 'creepy', 
+    'dark', 'pain', 'scream', 'fear', 'nightmare', 'evil', 'monster', 'zombie',
+    'weapon', 'gun', 'knife', 'fight', 'war', 'skull', 'grave'
+  ];
+
+  let userQuery = (q || '').toLowerCase().trim();
+  
+  // 2. 위험 단어가 하나라도 포함되면 즉시 "평화로운 자연"으로 검색어 강제 전환
+  const isDangerous = dangerZone.some(word => userQuery.includes(word));
+  
+  // 3. 긍정적인 이미지만 나오게 하는 마법의 접미사 (Exclusion 기호 삭제)
+  const positiveBoost = " bright aesthetic high-quality professional";
+  
+  let finalQuery;
+  if (!userQuery || isDangerous) {
+    // 입력이 없거나 위험하면 평화로운 테마 중 랜덤 선택
+    const safePicks = ['sunny morning', 'clear blue sky', 'minimal design', 'spring garden', 'white modern architecture'];
+    finalQuery = safePicks[Math.floor(Math.random() * safePicks.length)];
+  } else {
+    // 안전한 입력일 때만 사용자 검색어 + 긍정 보정
+    finalQuery = userQuery + positiveBoost;
+  }
 
   try {
-    let apiUrl;
-    // 2. 검색 엔진에게 "이 단어들이 포함된 태그는 결과에서 빼줘"라고만 요청 (Negative Filter)
-    // 사용자 검색어에 영향을 주지 않으면서 필터링만 수행
-    const strictExclusion = " -horror -gore -blood -dead -scary -creepy";
-
-    if (q && !isUnsafe) {
-      // 사용자의 검색어 그대로 사용 (다양성 확보)
-      apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q + strictExclusion)}&per_page=20&orientation=landscape`;
-    } else {
-      // 금지어거나 비어있을 때만 무작위 고화질 이미지
-      apiUrl = `https://api.pexels.com/v1/curated?per_page=20`;
-    }
-
+    // orientation=landscape를 강제하여 기괴한 세로형 이미지 배제
+    let apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(finalQuery)}&per_page=20&orientation=landscape`;
+    
     if (color) apiUrl += `&color=${encodeURIComponent(color)}`;
 
-    const response = await fetch(apiUrl, { headers: { Authorization: apiKey } });
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: apiKey }
+    });
     const data = await response.json();
     
     let images = data.photos ? data.photos.map(p => p.src.large) : [];
 
-    if (images.length === 0) {
-      images = [`https://picsum.photos/seed/${Math.random()}/1200/800`];
+    // 검색 결과가 없거나 적을 때를 대비한 3중 안전망 (검증된 고화질 풍경 사진들)
+    if (images.length < 5) {
+      const fallbackImages = [
+        "https://images.pexels.com/photos/2817421/pexels-photo-2817421.jpeg",
+        "https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg",
+        "https://images.pexels.com/photos/709552/pexels-photo-709552.jpeg"
+      ];
+      images = [...images, ...fallbackImages];
     }
 
     res.status(200).json({ images });
   } catch (error) {
-    res.status(200).json({ images: [`https://picsum.photos/seed/safe/1200/800`] });
+    // 서버 에러 시 Picsum에서 안전한 seed로 이미지 호출
+    res.status(200).json({ images: [`https://picsum.photos/seed/peaceful/1200/800`] });
   }
 }
