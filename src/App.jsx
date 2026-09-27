@@ -215,6 +215,7 @@ function App() {
                   <span className="input-measure">{inputText}</span>
                 </div>
               </div>
+              {/* 회색 서서히 뜨는 힌트 복구 */}
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
           </footer>
