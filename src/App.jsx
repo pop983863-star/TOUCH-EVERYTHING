@@ -206,7 +206,8 @@ function App() {
                 </div>
               )}
 
-              <p className="sub-desc">Experimental Design System for {view}.</p>
+              <p className="sub-desc">일상 속에서 지나치는 순간을 재조명하는 라이프스타일 브랜드이다.
+의식적 트리거의 역할로 기능하여 일상을 더 자주, 더 깊게 바라보도록 돕는다. {view}.</p>
             </div>
           </div>
 
