@@ -110,3 +110,64 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
 
 .clickable { cursor: pointer !important; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* ... 기존 스타일 모두 유지 ... */
+
+/* --- ABOUT EDITORIAL STYLE --- */
+.about-editorial-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.about-date {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #999;
+  margin-bottom: 30px;
+}
+
+.about-question {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #111;
+}
+
+.about-body {
+  font-size: 14px;
+  line-height: 2;
+  color: #444;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* 슬로건 박스: 약 5cm(190px) 아래 배치 */
+.about-slogan-box {
+  margin-top: 190px;
+  background: #000;
+  color: #fff;
+  padding: 40px 60px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.8;
+  letter-spacing: -0.01em;
+  width: fit-content;
+  transition: transform 0.4s ease;
+}
+
+.about-slogan-box:hover {
+  transform: scale(1.02);
+}
+
+/* 스크롤 여백 보정 */
+.sub-content-scroll {
+  padding: 140px 20px 180px 20px; /* 슬로건 하단 여백 추가 */
+}
+
+/* 기존 nav active 색상 강조 */
+.top-nav button.active {
+  color: #000 !important;
+  opacity: 1;
+}
