@@ -1,4 +1,3 @@
-/* 1. IBM Plex Sans 폰트 임포트 */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap');
 
 :root {
@@ -8,236 +7,96 @@
 }
 
 body {
-  margin: 0;
-  background-color: #ffffff;
+  margin: 0; background-color: #ffffff;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
-  overflow: hidden;
+  font-weight: 400; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.app-root-container {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  position: relative;
-}
+.app-root-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+.app-root-container { width: 100vw; height: 100vh; position: relative; }
 
-.page-home {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
+/* --- GRID & VIEWPORT --- */
+.page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
+.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; z-index: 1; }
+.page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
+.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
 
-.viewport {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+/* 그리드 크기 강제 고정 (이미지가 커지는 현상 해결) */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
-  height: var(--grid-h);
-}
+@@ -28,11 +29,12 @@
 
 .layer-static, .layer-dynamic {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
+  position: absolute; top: 0; left: 0;
+  width: var(--grid-w); height: var(--grid-h);
+  width: var(--grid-w); height: var(--grid-h); /* 부모 크기에 맞춰 고정 */
+  opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none;
 }
+.on { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
+.pixel-perfect { width: 100%; height: 100%; object-fit: fill; display: block; }
 
-.is-active, .on {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  z-index: 10;
-}
-
-.pixel-perfect {
-  width: 100%; height: 100%;
-  object-fit: fill; 
-  display: block;
-}
+.layer-static img { width: 100%; height: 100%; object-fit: fill; display: block; }
 
 .mask-circle {
-  position: absolute;
-  width: var(--node-size);
-  height: var(--node-size);
-  border-radius: 50%;
-  background-repeat: no-repeat;
-  background-size: var(--grid-w) var(--grid-h);
-  transition: background-image 1.2s ease-in-out;
+  position: absolute; width: var(--node-size); height: var(--node-size);
+@@ -48,28 +50,20 @@
+}
+.logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
+
+/* --- [수정] 푸터 위치 및 클릭 안정성 강화 --- */
+.footer-layout { 
+  height: 120px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: flex-start; 
+  width: 100%; 
+  position: absolute; 
+  bottom: 60px; /* 화면 아래에서 60px 띄움 */
+  z-index: 100; /* 그리드보다 위로 올려서 클릭 가능하게 함 */
 }
 
-.logo-overlay-marker {
-  position: absolute;
-  width: var(--node-size);
-  height: var(--node-size);
-  z-index: 20;
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo-overlay-marker img {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  transform: scale(1.02); 
-}
-
-/* --- [문제 1 해결] 홈 화면 텍스트 입력 영역 --- */
-.footer-layout {
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-bottom: 0.5px solid #111;
-  padding: 5px 0;
-  /* 고정 너비(320px)를 제거하고 유연하게 확장되도록 변경 */
-  min-width: 320px; 
-  max-width: 80vw; 
-}
+/* --- FOOTER & DYNAMIC INPUT --- */
+.footer-layout { height: 120px; display: flex; justify-content: center; align-items: flex-start; width: 100%; }
+.footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
 .dynamic-input-area {
-  display: flex;
-  align-items: center;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #111;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 0.5px solid #111;
+  padding: 5px 0; min-width: 50px; cursor: text;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.input-field-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
+.touch-text { font-size: 9px; letter-spacing: 0.25em; color: #111; transition: all 0.6s ease; }
+.touch-text { font-size: 9px; letter-spacing: 0.25em; color: #111; }
+.comma-text { font-size: 9px; color: #111; width: 0; opacity: 0; transition: all 0.4s ease; display: inline-block; overflow: hidden; }
+
+.dynamic-input-area.is-active .comma-text { width: 8px; opacity: 1; margin-right: 4px; }
+
+.input-field-wrapper { position: relative; display: flex; align-items: center; }
+@@ -82,20 +76,22 @@
+  font-size: 16px; color: #999;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  transform: scale(0.5625); transform-origin: left center;
+  z-index: 5; /* 인풋을 최상단으로 */
+  z-index: 2;
 }
 
-/* 텍스트 길이에 따라 자동으로 늘어나는 측정용 요소 */
-.input-measure {
-  white-space: pre;
-  min-width: 1px;
-  padding: 0 2px;
-  /* 실제 글자는 안 보이지만 공간은 차지하게 함 */
-  opacity: 0;
-}
+.input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.15em; text-transform: uppercase; min-width: 1px; }
 
-input {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
-  border: none;
-  outline: none;
-  /* 부모인 wrapper의 너비를 따라가도록 설정하여 잘림 방지 */
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  font-size: 9px;
-  text-transform: uppercase;
-  text-align: left;
-  background: transparent;
-  letter-spacing: 0.2em;
-  color: #111;
-}
+.editorial-cursor { width: 1px; height: 10px; background: #111; margin-left: 1px; animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 
-.footer-hint {
-  font-size: 8px;
-  margin-top: 10px;
-  color: #ccc;
-  letter-spacing: 0.1em;
-}
+.footer-hint { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 3s forwards; }
+@keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- 서브페이지 스타일 --- */
-.page-sub {
-  position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: #fff; z-index: 100; animation: fadeIn 1s ease;
-}
+/* --- EVERYTHING & OTHERS --- */
+/* --- EVERYTHING & SUBPAGES --- */
+.page-everything { background: #fff; cursor: crosshair; position: relative; }
+canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease; }
+.zooming canvas { transform: scale(12); filter: blur(30px); opacity: 0; }
 
-.top-nav { position: absolute; top: 60px; display: flex; gap: 50px; z-index: 200; }
-.top-nav button { 
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 700;
-  background: none; border: none; font-size: 11px; letter-spacing: 0.25em; 
-  cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; 
-}
-.top-nav button.active, .top-nav button:hover { color: #000; }
-
-.sub-title { 
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 700;
-  font-size: 48px; letter-spacing: -0.02em; margin-bottom: 20px; 
-}
-
-.sub-desc { 
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
-  font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; 
-}
-
-.home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 200;}
-.home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.clickable { cursor: pointer !important; }
-
-/* --- [문제 2 해결] Everything 페이지 (망점 페이지) 스타일 --- */
-.page-everything {
-  width: 100vw; height: 100vh;
-  position: relative;
-  background: #000;
-  overflow: hidden;
-}
-
-.halftone-controls-wrapper {
-  position: absolute;
-  top: 40px;
-  right: 40px;
-  z-index: 300;
-}
-
-.halftone-box {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 12px 20px;
-  border: 1px solid #111;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  min-width: 220px; /* 박스 너비 확보 */
-}
-
-.halftone-box span {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-/* 슬라이더 바가 밖으로 나가지 않도록 고정 */
-.halftone-box input[type="range"] {
-  flex: 1; /* 남은 공간 모두 차지 */
-  width: 100%; /* 부모 너비 안으로 강제 */
-  cursor: pointer;
-}
-
-.everything-zoom-hint {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  z-index: 300;
-}
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.halftone-controls-wrapper { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); padding: 20px; z-index: 100; }
+.halftone-box { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px 30px; border-radius: 8px; background: rgba(255, 255, 255, 0); transition: background 0.3s ease, box-shadow 0.3s ease; }
+.halftone-controls-wrapper:hover .halftone-box { background: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
