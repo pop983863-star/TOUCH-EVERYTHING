@@ -100,7 +100,7 @@ body {
   transform: scale(1.02);
 }
 
-/* --- FOOTER & DYNAMIC INPUT (잘림 현상 완전 해결) --- */
+/* --- FOOTER & DYNAMIC INPUT (언더바 길이 수정 핵심) --- */
 .footer-layout {
   height: 120px;
   display: flex;
@@ -114,17 +114,18 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  width: 100%;
+  /* 컨테이너 자체가 너비를 꽉 채우지 않도록 함 */
 }
 
 .dynamic-input-area {
-  display: flex;
+  /* inline-flex로 변경하여 텍스트 길이에 딱 맞게 조절 */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* 선을 텍스트 길이에 맞게 설정 */
   border-bottom: 0.5px solid #111;
   padding: 5px 0;
-  /* 영역 제한을 없애고 텍스트에 따라 자유롭게 늘어나도록 함 */
-  min-width: 10px;
+  min-width: 20px;
   max-width: 90vw;
   cursor: text;
 }
@@ -145,22 +146,22 @@ body {
   overflow: hidden;
 }
 
+/* TOUCH 옆에 쉼표가 붙을 때의 간격 */
 .dynamic-input-area.is-active .comma-text {
-  width: 8px;
+  width: 10px;
   opacity: 1;
-  margin-right: 4px;
 }
 
 .input-field-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  /* 가짜 커서 등이 자리를 차지하지 않도록 최소화 */
+  /* 입력창이 늘어날 때 선도 같이 늘어남 */
 }
 
 input {
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 9px; /* 스케일 대신 직접 폰트 사이즈 지정하여 버그 방지 */
+  font-size: 9px;
   font-weight: 400;
   background: transparent;
   border: none;
@@ -170,13 +171,11 @@ input {
   letter-spacing: 0.2em;
   z-index: 2;
   width: 100%;
-  /* [해결] 브라우저 기본 커서를 검은색 얇은 선으로 디자인에 맞춤 */
-  caret-color: #111; 
+  caret-color: #111;
   padding: 0;
   margin: 0;
 }
 
-/* 텍스트 너비를 측정해서 input의 길이를 늘려주는 요소 */
 .input-measure {
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 9px;
@@ -185,12 +184,11 @@ input {
   visibility: hidden;
   white-space: pre;
   pointer-events: none;
-  /* input이 이 너비를 정확히 따라가도록 함 */
+  /* 실제 글자 수만큼 공간 확보 */
 }
 
-/* [문제의 원인 해결] 중복되는 가짜 커서를 화면에서 완전히 제거 */
 .editorial-cursor {
-  display: none !important;
+  display: none !important; /* 가짜 커서 제거 유지 */
 }
 
 .footer-hint {
