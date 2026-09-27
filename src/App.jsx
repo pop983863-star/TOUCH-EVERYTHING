@@ -1,3 +1,9 @@
+‎src/App.jsx‎
++1
+-1
+Lines changed: 1 addition & 1 deletion
+Original file line number	Diff line number	Diff line change
+@@ -1,209 +1,209 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 
@@ -29,7 +35,7 @@ function App() {
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
-  
+
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
@@ -141,6 +147,7 @@ function App() {
           <div className="viewport">
             <div className="main-grid-wrapper">
               <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
+              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map(n => (
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
@@ -152,8 +159,17 @@ function App() {
             </div>
           </div>
           <footer className="footer-layout">
-            <div className="footer-form">
-              <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" placeholder="TYPE TO START" />
+            <div className="footer-container">
+              <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
+                <span className="touch-text">TOUCH</span>
+                <span className="comma-text">,</span>
+                <div className="input-field-wrapper">
+                  <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
+                  <span className="input-measure">{inputText}</span>
+                  <div className="editorial-cursor"></div>
+                </div>
+              </div>
+              {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -198,3 +214,9 @@ function App() {
 }
 
 export default App;
+0 commit comments
+Comments
+0
+ (0)
+Comment
+You're not receiving notifications from this thread.
