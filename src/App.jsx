@@ -18,8 +18,8 @@ const generateGridNodes = () => {
 };
 
 function App() {
-  const [view, setView] = useState('home'); 
-  const [lastSubView, setLastSubView] = useState('about');
+  const [view, setView] = useState('home'); // 'home'은 인트로 그리드 화면
+  const [lastSubView, setLastSubView] = useState('overview'); // 'overview'가 내부 홈
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [nodes] = useState(generateGridNodes());
@@ -64,15 +64,9 @@ function App() {
     setInputText(val);
     lastInteractionTime.current = Date.now();
     subPageActivityTime.current = Date.now();
-
-    if (mode === 'static' && val.trim() !== '') {
-      setMode('interactive');
-    }
-
+    if (mode === 'static' && val.trim() !== '') setMode('interactive');
     if (inputTimeout.current) clearTimeout(inputTimeout.current);
-    inputTimeout.current = setTimeout(() => {
-      if (val.trim() !== '') fetchNewImage(val);
-    }, 600);
+    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
   };
 
   const moveLogos = useCallback(() => {
@@ -117,36 +111,27 @@ function App() {
       const now = Date.now();
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 12) { 
-          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
-        }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { 
-          if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } 
-        }
-        else if (mode === 'slideshow' && diff >= 55) { 
-          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
-        }
-      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { 
-        setView('home'); setMode('static'); 
-      }
+        if (mode === 'interactive' && diff >= 12) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
+        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } }
+        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
+      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view, isFocused]);
 
   useEffect(() => {
     if (view === 'home' && mode !== 'static' && !isFocused) {
-      const interval = setInterval(() => { 
-        moveLogos(); 
-        fetchNewImage(mode === 'slideshow' ? '' : inputText); 
-      }, 7500);
+      const interval = setInterval(() => { moveLogos(); fetchNewImage(mode === 'slideshow' ? '' : inputText); }, 7500);
       return () => clearInterval(interval);
     }
   }, [mode, view, moveLogos, isFocused, inputText]);
 
   const renderNav = () => (
     <nav className="top-nav">
-      {['about', 'identity', 'objects'].map(v => (
-        <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
+      {['overview', 'about', 'identity', 'objects'].map(v => (
+        <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>
+          {v === 'overview' ? 'HOME' : v.toUpperCase()}
+        </button>
       ))}
       <button onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
     </nav>
@@ -154,6 +139,7 @@ function App() {
 
   return (
     <div className="app-root-container">
+      {/* 1단계: 인트로 홈 (그리드) */}
       {view === 'home' && (
         <div className="page-home">
           <div className="viewport">
@@ -164,7 +150,10 @@ function App() {
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
                 ))}
                 {activeIndices.map((idx, i) => (
-                  <div key={i} className="logo-overlay-marker clickable" style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }} onClick={() => { setView('about'); setLastSubView('about'); }}><img src="/assets/logo-reference.png" alt="Logo" /></div>
+                  <div key={i} className="logo-overlay-marker clickable" style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }} 
+                    onClick={() => { setView('overview'); setLastSubView('overview'); }}>
+                    <img src="/assets/logo-reference.png" alt="Logo" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -172,8 +161,7 @@ function App() {
           <footer className="footer-layout">
             <div className="footer-container">
               <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-text">TOUCH</span>
-                <span className="comma-text">,</span>
+                <span className="touch-text">TOUCH</span><span className="comma-text">,</span>
                 <div className="input-field-wrapper">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
                   <span className="input-measure">{inputText}</span>
@@ -185,38 +173,65 @@ function App() {
         </div>
       )}
 
-      {['about', 'identity', 'objects'].includes(view) && (
+      {/* 2단계: 내부 서브페이지들 */}
+      {['overview', 'about', 'identity', 'objects'].includes(view) && (
         <div className="page-sub">
           {renderNav()}
-          
           <div className="sub-content-scroll">
             <div className="content-area">
-              <h1 className="sub-title">{view.toUpperCase()}</h1>
               
-              {view === 'about' && (
-                <div className="sub-video-container">
-                  <div className="video-box">
-                    <video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" />
-                    <p className="video-label">LOGO </p>
+              {/* [NEW] 내부 페이지의 홈 (Overview) - 영상 배치 */}
+              {view === 'overview' && (
+                <>
+                  <h1 className="sub-title">OVERVIEW</h1>
+                  <div className="sub-video-container">
+                    <div className="video-box">
+                      <video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" />
+                      <p className="video-label">LOGO LOOP</p>
+                    </div>
+                    <div className="video-box">
+                      <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
+                      <p className="video-label">LOGO SYSTEM</p>
+                    </div>
                   </div>
-                  <div className="video-box">
-                    <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
-                    <p className="video-label">SYMBOL </p>
+                </>
+              )}
+
+              {/* [NEW] ABOUT 페이지 - 서정적 텍스트 및 블랙박스 슬로건 */}
+              {view === 'about' && (
+                <div className="about-editorial-wrap">
+                  <p className="about-date">2026년 6월 12일, 맑음</p>
+                  <h2 className="about-question">당신은 무엇에 주의를 기울이고 있나요?</h2>
+                  <div className="about-body">
+                    그 어느 때보다 많은 정보와 콘텐츠에 접근할 수 있게 되었다.<br/>
+                    새로운 것을 발견하는 일은 쉬워졌지만, 정작 우리 주변의 익숙한 것들은 관심 밖으로 밀려나고 있다.<br/><br/>
+                    오늘 마주한 것들을 떠올릴 수 있을까.<br/>
+                    브랜드는 어떤 시선을 제안할 수 있을까.
+                  </div>
+                  
+                  {/* 5cm (약 190px) 간격 후 슬로건 블랙박스 */}
+                  <div className="about-slogan-box">
+                    지나친 모든 것에 다시 관심을 기울일 때,<br/>
+                    평범한 일상은 새로운 발견이 된다.
                   </div>
                 </div>
               )}
 
-              <p className="sub-desc">일상 속에서 지나치는 순간을 재조명하는 라이프스타일 브랜드이다.
-의식적 트리거의 역할로 기능하여 일상을 더 자주, 더 깊게 바라보도록 돕는다. {view}.</p>
+              {/* Identity & Objects 기본 텍스트 */}
+              {(view === 'identity' || view === 'objects') && (
+                <>
+                  <h1 className="sub-title">{view.toUpperCase()}</h1>
+                  <p className="sub-desc">Experimental Design System for {view}.</p>
+                </>
+              )}
+
             </div>
           </div>
-
-          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}>
-            <img src="/assets/logo-reference.png" alt="Home" />
-          </div>
+          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
       )}
 
+      {/* Everything 페이지 */}
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
           <canvas ref={canvasRef} onClick={(e) => {
