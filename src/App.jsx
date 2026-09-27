@@ -147,11 +147,11 @@ function App() {
             <div className="sub-video-container">
               <div className="video-box">
                 <video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" />
-                <p className="video-label">LOGO LOOP</p>
+                <p className="video-label"></p>
               </div>
               <div className="video-box">
                 <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
-                <p className="video-label">LOGO SYSTEM</p>
+                <p className="video-label"></p>
               </div>
             </div>
           )}
