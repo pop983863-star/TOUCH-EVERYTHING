@@ -15,12 +15,31 @@ body {
 
 .app-root-container { width: 100vw; height: 100vh; position: relative; }
 
-/* --- INTRO GRID --- */
+/* --- GRID & VIEWPORT --- */
 .page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
-.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
-.main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
-.layer-static, .layer-dynamic { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
+.viewport { 
+  flex: 1; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 100%; 
+  position: relative; 
+}
+
+.main-grid-wrapper {
+  position: relative;
+  width: var(--grid-w); 
+  height: var(--grid-h); 
+  transform-origin: center center; /* 중앙 기준 스케일링 */
+}
+
+.layer-static, .layer-dynamic {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none;
+}
 .on { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
+
 .pixel-perfect { width: 100%; height: 100%; object-fit: fill; display: block; }
 
 .mask-circle {
@@ -35,7 +54,10 @@ body {
   z-index: 20; transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex; align-items: center; justify-content: center;
 }
-.logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
+.logo-overlay-marker img { 
+  width: 100%; height: 100%; border-radius: 50%; 
+  object-fit: cover; transform: scale(1.02); 
+}
 
 /* --- FOOTER & INPUT --- */
 .footer-layout { height: 120px; display: flex; justify-content: center; align-items: flex-start; width: 100%; }
@@ -52,7 +74,6 @@ body {
 
 .input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 0; }
 
-/* 모바일 줌 방지 (16px 설정 후 9px 처럼 축소) */
 input {
   font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 400; background: transparent; border: none; outline: none;
   color: #111; text-transform: uppercase; letter-spacing: 0.15em; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -60,21 +81,11 @@ input {
 }
 .input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; text-transform: uppercase; min-width: 2px; }
 
-/* 회색 힌트 텍스트 폰트 및 모션 복구 */
 .footer-hint {
-  font-family: 'IBM Plex Sans', sans-serif; /* 폰트 일치 */
-  font-size: 9px; /* 입력창과 크기 일치 */
-  color: #d1d1d1; /* 회색 유지 */
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  opacity: 0;
-  animation: hintAppear 1.5s ease 2s forwards; /* 서서히 뜨는 효과 */
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase;
+  opacity: 0; animation: hintAppear 1.5s ease 2s forwards;
 }
-
-@keyframes hintAppear {
-  from { opacity: 0; transform: translateY(-2px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 
 /* --- SUBPAGE LAYOUT --- */
 .page-sub { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 100; animation: fadeIn 1s ease; }
@@ -100,6 +111,7 @@ input {
 .slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
 
 .home-back-btn { position: fixed !important; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 500; transition: transform 0.3s ease; }
+.home-back-btn:hover { transform: scale(1.1); }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
 /* EVERYTHING */
@@ -116,13 +128,43 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
 .clickable { cursor: pointer !important; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* --- 📱 MOBILE RESPONSIVE --- */
+/* --- 📱 MOBILE RESPONSIVE UPDATES --- */
 @media (max-width: 600px) {
-  .main-grid-wrapper { transform: scale(0.65); transform-origin: center center; }
+  .viewport { 
+    padding: 0; 
+    justify-content: center; 
+    align-items: center; 
+  }
+
+  .main-grid-wrapper { 
+    /* 오른쪽 치우침 방지: 가로 정중앙 고정 */
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    /* 스케일을 적용해도 그리드와 로고 마커가 정확히 겹치도록 scale 비율 조정 */
+    transform: scale(0.68); 
+    transform-origin: center center;
+  }
+  
+  /* 로고 이미지 찌그러짐 해결: 비율을 1:1로 강제 고정 */
+  .logo-overlay-marker img {
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+  }
+
   .top-nav { gap: 15px; top: 30px; width: 95%; }
   .top-nav button { font-size: 9px; letter-spacing: 0.15em; }
   .sub-content-scroll { padding: 110px 15px 120px 15px; }
-  .video-box { width: calc(var(--grid-w) * 0.65); height: calc(var(--grid-h) * 0.65); margin: 0 auto; }
+
+  /* 비디오 박스 모바일 스케일 동기화 */
+  .video-box { 
+    width: calc(var(--grid-w) * 0.68); 
+    height: calc(var(--grid-h) * 0.68);
+    margin: 0 auto;
+  }
+
   .about-question { font-size: 18px; line-height: 1.4; padding: 0 10px; }
   .about-body { font-size: 12px; line-height: 2.2; padding: 0 10px; text-align: justify; }
   .about-slogan-text { margin-top: 100px; padding: 30px 20px; font-size: 13px; width: 85vw; }
