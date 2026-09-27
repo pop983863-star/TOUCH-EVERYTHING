@@ -28,7 +28,7 @@ function App() {
   const [currentBgImage, setCurrentBgImage] = useState('');
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null); // 컬러값 상태
   
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
@@ -45,13 +45,13 @@ function App() {
     });
   };
 
-  // 이미지 검색 기능 (Visual Spice & Filtering 적용)
   const fetchNewImage = async (query = '', color = null) => {
     try {
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
       if (data.images && data.images.length > 0) {
-        const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
+        const randomIndex = Math.floor(Math.random() * data.images.length);
+        const nextImgUrl = data.images[randomIndex];
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
@@ -64,9 +64,11 @@ function App() {
     setInputText(val);
     lastInteractionTime.current = Date.now();
     subPageActivityTime.current = Date.now();
+
     if (mode === 'static' && val.trim() !== '') {
       setMode('interactive');
     }
+
     if (inputTimeout.current) clearTimeout(inputTimeout.current);
     inputTimeout.current = setTimeout(() => {
       if (val.trim() !== '') fetchNewImage(val);
@@ -115,10 +117,18 @@ function App() {
       const now = Date.now();
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 12) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } }
-        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
+        if (mode === 'interactive' && diff >= 12) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+        else if (mode === 'static' && diff >= 25 && diff < 55) { 
+          if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } 
+        }
+        else if (mode === 'slideshow' && diff >= 55) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { 
+        setView('home'); setMode('static'); 
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view, isFocused]);
@@ -142,49 +152,13 @@ function App() {
     </nav>
   );
 
-  const renderSubPage = (title, description) => (
-    <div className="page-sub">
-      <nav className="top-nav">
-        {['about', 'identity', 'objects'].map(v => (
-          <button key={v} className={view === v ? 'active' : ''} onClick={() => { setView(v); setLastSubView(v); }}>{v.toUpperCase()}</button>
-        ))}
-        <button onClick={() => { setView('everything'); fetchNewImage(inputText); }}>EVERYTHING</button>
-      </nav>
-      
-      <div className="sub-content-scroll">
-        <div className="content-area">
-          <h1 className="sub-title">{title}</h1>
-          
-          {view === 'about' && (
-            <div className="sub-video-container">
-              <div className="video-box">
-                <video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" />
-                <p className="video-label">LOGO LOOP</p>
-              </div>
-              <div className="video-box">
-                <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
-                <p className="video-label">LOGO SYSTEM</p>
-              </div>
-            </div>
-          )}
-
-          <p className="sub-desc">{description}</p>
-        </div>
-      </div>
-
-      <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}>
-        <img src="/assets/logo-reference.png" alt="Home" />
-      </div>
-    </div>
-  );
-
   return (
     <div className="app-root-container">
       {view === 'home' && (
         <div className="page-home">
           <div className="viewport">
             <div className="main-grid-wrapper">
-              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
+              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map(n => (
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
@@ -211,34 +185,86 @@ function App() {
         </div>
       )}
 
-      {['about', 'identity', 'objects'].includes(view) && renderSubPage(view.toUpperCase(), `Content for ${view} page design system.`)}
+      {['about', 'identity', 'objects'].includes(view) && (
+        <div className="page-sub">
+          {renderNav()}
+          <div className="content-area">
+            <h1 className="sub-title">{view.toUpperCase()}</h1>
+            <p className="sub-desc">Experimental Design System for {view}.</p>
+          </div>
+          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
+        </div>
+      )}
+
+ 
 
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
-          <canvas ref={canvasRef} onClick={(e) => {
-            if (isZooming || !imageBuffer.current) return;
-            try {
-              const canvas = canvasRef.current;
-              const rect = canvas.getBoundingClientRect();
-              const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-              const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
-              const data = imageBuffer.current.data;
-              const i = (y * canvas.width + x) * 4;
-              const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
-              setSelectedColor(hex.toUpperCase()); setIsZooming(true);
-              fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
-            } catch(err) { setIsZooming(true); fetchNewImage(inputText).then(() => { setTimeout(() => setIsZooming(false), 2000); }); }
-          }} />
+          <canvas 
+            ref={canvasRef} 
+            onClick={(e) => {
+              if (isZooming || !imageBuffer.current) return;
+              
+              try {
+                const canvas = canvasRef.current;
+                const rect = canvas.getBoundingClientRect();
+                
+                // 화면상의 좌표를 캔버스 내부 해상도 좌표로 변환
+                const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+                const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+                
+                const data = imageBuffer.current.data;
+                const i = (y * canvas.width + x) * 4;
+                
+                // 데이터가 유효한지 확인 후 Hex 추출
+                if (data[i] !== undefined) {
+                  const hex = '#' + [data[i], data[i+1], data[i+2]]
+                    .map(val => val.toString(16).padStart(2, '0'))
+                    .join('');
+                  
+                  console.log("Selected Hex:", hex); // 작동 확인용 로그
+                  setSelectedColor(hex.toUpperCase()); 
+                  setIsZooming(true);
+
+                  fetchNewImage(inputText, hex).then(() => { 
+                    // 로딩 시간을 고려하여 조금 더 길게(2초) 유지
+                    setTimeout(() => { 
+                      setIsZooming(false); 
+                      setSelectedColor(null); 
+                    }, 2000); 
+                  });
+                }
+              } catch (err) {
+                console.error("Color pick error:", err);
+                setIsZooming(true);
+                fetchNewImage(inputText).then(() => {
+                  setTimeout(() => setIsZooming(false), 2000);
+                });
+              }
+            }} 
+          />
+
           <div className="halftone-controls-wrapper">
             <div className="halftone-box">
               <span>DENSITY</span>
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
+
+          {/* 컬러 힌트 UI: selectedColor가 있을 때만 강조되도록 수정 */}
           <div className="everything-zoom-hint">
-            {selectedColor ? <span style={{ color: selectedColor }}>ZOOMING INTO {selectedColor}</span> : <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>}
+            {selectedColor ? (
+              <span style={{ color: selectedColor, fontWeight: '700' }}>
+                ZOOMING INTO {selectedColor}
+              </span>
+            ) : (
+              <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>
+            )}
           </div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}>
+            <img src="/assets/logo-reference.png" alt="Home" />
+          </div>
         </div>
       )}
     </div>
