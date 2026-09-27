@@ -13,39 +13,54 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
   overflow: hidden;
+  width: 100vw;
+  height: 100vh;
 }
 
+/* 최상위 컨테이너 */
 .app-root-container {
   width: 100vw;
   height: 100vh;
   display: flex;
   position: relative;
+  overflow: hidden;
 }
 
+/* 홈 페이지 레이아웃 */
 .page-home {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
+/* 그리드가 들어가는 핵심 구역 (중앙 정렬 보장) */
 .viewport {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  position: relative;
 }
 
+/* [중요] 17개 원 그리드 래퍼: 이 박스가 모든 요소의 기준점입니다. */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
   height: var(--grid-h);
+  /* 화면이 작아질 경우를 대비해 스케일 유지 */
+  flex-shrink: 0; 
 }
 
+/* 레이어 공통 스타일 */
 .layer-static, .layer-dynamic {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%; /* 부모인 496px에 맞춤 */
+  height: 100%; /* 부모인 396px에 맞춤 */
   opacity: 0;
   transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
@@ -57,12 +72,17 @@ body {
   z-index: 10;
 }
 
-.pixel-perfect {
-  width: 100%; height: 100%;
-  object-fit: fill; 
+/* [문제 해결] 초기 이미지 사이즈 강제 고정 */
+.layer-static img.pixel-perfect {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: var(--grid-w) !important;
+  max-height: var(--grid-h) !important;
+  object-fit: fill; /* 박스 크기에 맞춰 꽉 채움 */
   display: block;
 }
 
+/* 마스킹 원 스타일 */
 .mask-circle {
   position: absolute;
   width: var(--node-size);
@@ -73,6 +93,7 @@ body {
   transition: background-image 1.2s ease-in-out;
 }
 
+/* 로고 마커 스타일 */
 .logo-overlay-marker {
   position: absolute;
   width: var(--node-size);
@@ -85,13 +106,14 @@ body {
 }
 
 .logo-overlay-marker img {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transform: scale(1.02); 
+  transform: scale(1.02); /* 마스킹 원을 완전히 가림 */
 }
 
-/* --- [문제 1 해결] 홈 화면 텍스트 입력 영역 --- */
+/* 푸터 레이아웃 */
 .footer-layout {
   height: 120px;
   display: flex;
@@ -100,39 +122,10 @@ body {
   width: 100%;
 }
 
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.footer-form {
   border-bottom: 0.5px solid #111;
   padding: 5px 0;
-  /* 고정 너비(320px)를 제거하고 유연하게 확장되도록 변경 */
-  min-width: 320px; 
-  max-width: 80vw; 
-}
-
-.dynamic-input-area {
-  display: flex;
-  align-items: center;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #111;
-}
-
-.input-field-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* 텍스트 길이에 따라 자동으로 늘어나는 측정용 요소 */
-.input-measure {
-  white-space: pre;
-  min-width: 1px;
-  padding: 0 2px;
-  /* 실제 글자는 안 보이지만 공간은 차지하게 함 */
-  opacity: 0;
+  width: 320px;
 }
 
 input {
@@ -140,104 +133,88 @@ input {
   font-weight: 400;
   border: none;
   outline: none;
-  /* 부모인 wrapper의 너비를 따라가도록 설정하여 잘림 방지 */
-  position: absolute;
-  top: 0; left: 0;
   width: 100%;
-  height: 100%;
   font-size: 9px;
   text-transform: uppercase;
-  text-align: left;
+  text-align: center;
   background: transparent;
   letter-spacing: 0.2em;
   color: #111;
 }
 
-.footer-hint {
-  font-size: 8px;
-  margin-top: 10px;
-  color: #ccc;
-  letter-spacing: 0.1em;
-}
-
 /* --- 서브페이지 스타일 --- */
 .page-sub {
-  position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: #fff; z-index: 100; animation: fadeIn 1s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  z-index: 100;
+  animation: fadeIn 1s ease;
 }
 
-.top-nav { position: absolute; top: 60px; display: flex; gap: 50px; z-index: 200; }
-.top-nav button { 
+.top-nav {
+  position: absolute;
+  top: 60px;
+  display: flex;
+  gap: 50px;
+}
+
+.top-nav button {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 700;
-  background: none; border: none; font-size: 11px; letter-spacing: 0.25em; 
-  cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; 
+  background: none;
+  border: none;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  color: #d1d1d1;
+  transition: color 0.4s ease;
 }
-.top-nav button.active, .top-nav button:hover { color: #000; }
 
-.sub-title { 
+.top-nav button.on, .top-nav button:hover {
+  color: #000;
+}
+
+.sub-title {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 700;
-  font-size: 48px; letter-spacing: -0.02em; margin-bottom: 20px; 
+  font-size: 48px;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
 }
 
-.sub-desc { 
+.sub-desc {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
-  font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; 
+  font-size: 14px;
+  color: #666;
+  max-width: 400px;
+  text-align: center;
+  line-height: 1.6;
 }
 
-.home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 200;}
-.home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.clickable { cursor: pointer !important; }
-
-/* --- [문제 2 해결] Everything 페이지 (망점 페이지) 스타일 --- */
-.page-everything {
-  width: 100vw; height: 100vh;
-  position: relative;
-  background: #000;
-  overflow: hidden;
-}
-
-.halftone-controls-wrapper {
+.home-back-btn {
   position: absolute;
-  top: 40px;
   right: 40px;
-  z-index: 300;
-}
-
-.halftone-box {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 12px 20px;
-  border: 1px solid #111;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  min-width: 220px; /* 박스 너비 확보 */
-}
-
-.halftone-box span {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-/* 슬라이더 바가 밖으로 나가지 않도록 고정 */
-.halftone-box input[type="range"] {
-  flex: 1; /* 남은 공간 모두 차지 */
-  width: 100%; /* 부모 너비 안으로 강제 */
+  bottom: 40px;
+  width: 50px;
+  height: 50px;
   cursor: pointer;
 }
 
-.everything-zoom-hint {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  z-index: 300;
+.home-back-btn img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
+
+.clickable-logo { cursor: pointer !important; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
