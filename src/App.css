@@ -1,4 +1,3 @@
-/* 1. IBM Plex Sans 폰트 임포트 */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap');
 
 :root {
@@ -17,83 +16,75 @@ body {
   height: 100vh;
 }
 
-/* 최상위 컨테이너 */
 .app-root-container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  position: relative;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
-/* 홈 페이지 레이아웃 */
 .page-home {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   position: relative;
 }
 
-/* 그리드가 들어가는 핵심 구역 (중앙 정렬 보장) */
 .viewport {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  position: relative;
 }
 
-/* [중요] 17개 원 그리드 래퍼: 이 박스가 모든 요소의 기준점입니다. */
+/* [핵심] 모든 요소가 이 크기를 벗어날 수 없음 */
 .main-grid-wrapper {
   position: relative;
-  width: var(--grid-w);
-  height: var(--grid-h);
-  /* 화면이 작아질 경우를 대비해 스케일 유지 */
-  flex-shrink: 0; 
+  width: var(--grid-w) !important;
+  height: var(--grid-h) !important;
+  min-width: var(--grid-w);
+  min-height: var(--grid-h);
 }
 
-/* 레이어 공통 스타일 */
 .layer-static, .layer-dynamic {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%; /* 부모인 496px에 맞춤 */
-  height: 100%; /* 부모인 396px에 맞춤 */
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   opacity: 0;
   transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
-.is-active, .on {
+.on {
   opacity: 1 !important;
   pointer-events: auto !important;
   z-index: 10;
 }
 
-/* [문제 해결] 초기 이미지 사이즈 강제 고정 */
-.layer-static img.pixel-perfect {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: var(--grid-w) !important;
-  max-height: var(--grid-h) !important;
-  object-fit: fill; /* 박스 크기에 맞춰 꽉 채움 */
+/* [해결] 이미지가 거대해지는 현상 방지 */
+.pixel-perfect-img {
+  width: 496px !important;
+  height: 396px !important;
+  object-fit: fill !important;
   display: block;
 }
 
-/* 마스킹 원 스타일 */
 .mask-circle {
   position: absolute;
   width: var(--node-size);
   height: var(--node-size);
   border-radius: 50%;
   background-repeat: no-repeat;
-  background-size: var(--grid-w) var(--grid-h);
+  background-size: 496px 396px;
   transition: background-image 1.2s ease-in-out;
 }
 
-/* 로고 마커 스타일 */
 .logo-overlay-marker {
   position: absolute;
   width: var(--node-size);
@@ -106,20 +97,19 @@ body {
 }
 
 .logo-overlay-marker img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transform: scale(1.02); /* 마스킹 원을 완전히 가림 */
+  transform: scale(1.02);
 }
 
-/* 푸터 레이아웃 */
+/* 푸터 비율 고정 */
 .footer-layout {
   height: 120px;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  width: 100%;
 }
 
 .footer-form {
@@ -131,90 +121,33 @@ body {
 input {
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
-  border: none;
-  outline: none;
+  border: none; outline: none;
   width: 100%;
   font-size: 9px;
   text-transform: uppercase;
   text-align: center;
   background: transparent;
   letter-spacing: 0.2em;
-  color: #111;
 }
 
-/* --- 서브페이지 스타일 --- */
+/* --- 서브페이지 --- */
 .page-sub {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  z-index: 100;
-  animation: fadeIn 1s ease;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #fff; z-index: 100;
 }
 
-.top-nav {
-  position: absolute;
-  top: 60px;
-  display: flex;
-  gap: 50px;
+.top-nav { position: absolute; top: 60px; display: flex; gap: 50px; }
+.top-nav button { 
+  font-family: 'IBM Plex Sans', sans-serif; font-weight: 700;
+  background: none; border: none; font-size: 11px; letter-spacing: 0.25em; 
+  cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; 
 }
+.top-nav button.on { color: #000; }
 
-.top-nav button {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 700;
-  background: none;
-  border: none;
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  cursor: pointer;
-  color: #d1d1d1;
-  transition: color 0.4s ease;
-}
+.sub-title { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 48px; margin-bottom: 20px; }
+.sub-desc { font-family: 'IBM Plex Sans', sans-serif; font-weight: 400; font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; }
 
-.top-nav button.on, .top-nav button:hover {
-  color: #000;
-}
-
-.sub-title {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 700;
-  font-size: 48px;
-  letter-spacing: -0.02em;
-  margin-bottom: 20px;
-}
-
-.sub-desc {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  color: #666;
-  max-width: 400px;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.home-back-btn {
-  position: absolute;
-  right: 40px;
-  bottom: 40px;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-}
-
-.home-back-btn img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.clickable-logo { cursor: pointer !important; }
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; }
+.home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.clickable { cursor: pointer !important; }
