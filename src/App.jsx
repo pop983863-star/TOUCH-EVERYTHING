@@ -1,6 +1,4 @@
-// src/App.jsx 최상단
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-// layout fix commit - 2024.xx.xx (이런식으로 주석 추가)
 import './App.css';
 
 const COLUMN_STRUCTURE = [3, 4, 3, 4, 3];
@@ -142,7 +140,7 @@ function App() {
         <div className="page-home">
           <div className="viewport">
             <div className="main-grid-wrapper">
-              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" /></div>
+              <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
                 {nodes.map(n => (
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
@@ -154,17 +152,8 @@ function App() {
             </div>
           </div>
           <footer className="footer-layout">
-            <div className="footer-container">
-              <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-text">TOUCH</span>
-                <span className="comma-text">,</span>
-                <div className="input-field-wrapper">
-                  <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
-                  <span className="input-measure">{inputText}</span>
-                  <div className="editorial-cursor"></div>
-                </div>
-              </div>
-              {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
+            <div className="footer-form">
+              <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" placeholder="TYPE TO START" />
             </div>
           </footer>
         </div>
