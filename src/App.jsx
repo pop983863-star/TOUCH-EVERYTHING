@@ -1,4 +1,6 @@
+// src/App.jsx 최상단
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+// layout fix commit - 2024.xx.xx (이런식으로 주석 추가)
 import './App.css';
 
 const COLUMN_STRUCTURE = [3, 4, 3, 4, 3];
