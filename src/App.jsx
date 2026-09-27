@@ -196,7 +196,7 @@ function App() {
         </div>
       )}
 
-     // ... (기존 코드 동일)
+ 
 
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
