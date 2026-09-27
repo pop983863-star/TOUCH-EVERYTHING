@@ -28,14 +28,14 @@ function App() {
   const [currentBgImage, setCurrentBgImage] = useState('');
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null); // 컬러값 상태
   
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
   const inputRef = useRef(null);
-  const inputTimeout = useRef(null); // 타이핑 멈춤 감지용 타이머
+  const inputTimeout = useRef(null);
 
   const preloadImage = (url) => {
     return new Promise((resolve) => {
@@ -44,21 +44,14 @@ function App() {
       img.onload = () => resolve(url); img.onerror = () => resolve(url);
     });
   };
-// ... (기존 코드와 동일)
 
   const fetchNewImage = async (query = '', color = null) => {
     try {
-      // 쿼리가 있을 때와 없을 때의 차별화
-      const searchQuery = query.trim();
-      const res = await fetch(`/api/images?q=${encodeURIComponent(searchQuery)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
+      const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
-      
       if (data.images && data.images.length > 0) {
-        // [핵심] 검색 결과 중 상위 결과만 쓰지 않고 전체 리스트에서 무작위 선택
-        // 이렇게 하면 같은 단어를 쳐도 매번 다른 분위기의 사진이 나옵니다.
         const randomIndex = Math.floor(Math.random() * data.images.length);
         const nextImgUrl = data.images[randomIndex];
-        
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
@@ -67,25 +60,18 @@ function App() {
     }
   };
 
-// ... (이후 핸들러 및 렌더링 로직은 기존과 동일)
-
-  // [수정] 홈 화면 인터랙션 - 텍스트 입력 시 실시간 이미지 호출 추가
   const handleHomeInteraction = (val) => {
     setInputText(val);
     lastInteractionTime.current = Date.now();
     subPageActivityTime.current = Date.now();
 
-    // 입력이 시작되면 즉시 모드 전환
     if (mode === 'static' && val.trim() !== '') {
       setMode('interactive');
     }
 
-    // [핵심 추가] 타이핑 중에는 호출하지 않고, 0.6초간 멈췄을 때만 이미지를 가져옴 (Debouncing)
     if (inputTimeout.current) clearTimeout(inputTimeout.current);
     inputTimeout.current = setTimeout(() => {
-      if (val.trim() !== '') {
-        fetchNewImage(val);
-      }
+      if (val.trim() !== '') fetchNewImage(val);
     }, 600);
   };
 
@@ -135,9 +121,7 @@ function App() {
           setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
         }
         else if (mode === 'static' && diff >= 25 && diff < 55) { 
-          if (mode !== 'slideshow') { 
-            setMode('slideshow'); fetchNewImage(''); // 빈 쿼리로 명예의 전당 이미지 호출
-          } 
+          if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } 
         }
         else if (mode === 'slideshow' && diff >= 55) { 
           setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
@@ -153,8 +137,7 @@ function App() {
     if (view === 'home' && mode !== 'static' && !isFocused) {
       const interval = setInterval(() => { 
         moveLogos(); 
-        if (mode === 'slideshow') fetchNewImage(''); 
-        else fetchNewImage(inputText); // 인터랙티브 모드에서도 주기적으로 관련 이미지 교체
+        fetchNewImage(mode === 'slideshow' ? '' : inputText); 
       }, 7500);
       return () => clearInterval(interval);
     }
@@ -194,7 +177,6 @@ function App() {
                 <div className="input-field-wrapper">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
                   <span className="input-measure">{inputText}</span>
-                  <div className="editorial-cursor"></div>
                 </div>
               </div>
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
@@ -223,9 +205,16 @@ function App() {
             const y = Math.floor(e.clientY - rect.top);
             const data = imageBuffer.current.data;
             const i = (y * canvasRef.current.width + x) * 4;
+            // 클릭한 곳의 컬러 Hex 값 추출
             const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
-            setSelectedColor(hex); setIsZooming(true);
-            fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 1500); });
+            setSelectedColor(hex); 
+            setIsZooming(true);
+            fetchNewImage(inputText, hex).then(() => { 
+              setTimeout(() => { 
+                setIsZooming(false); 
+                setSelectedColor(null); 
+              }, 1500); 
+            });
           }} />
           <div className="halftone-controls-wrapper">
             <div className="halftone-box">
@@ -233,7 +222,10 @@ function App() {
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>{selectedColor ? `ZOOMING INTO ${selectedColor}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}</div>
+          {/* 컬러 힌트 UI 복구 */}
+          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
+            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+          </div>
           <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
       )}
