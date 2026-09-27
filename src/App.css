@@ -99,8 +99,7 @@ body {
   object-fit: cover;
   transform: scale(1.02);
 }
-
-/* --- FOOTER & DYNAMIC INPUT (언더바 길이 수정 핵심) --- */
+/* --- FOOTER & DYNAMIC INPUT (잉여 선 제거 버전) --- */
 .footer-layout {
   height: 120px;
   display: flex;
@@ -114,20 +113,22 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  /* 컨테이너 자체가 너비를 꽉 채우지 않도록 함 */
+  /* 부모가 자식 크기에 딱 맞게 줄어들도록 설정 */
+  width: auto; 
 }
 
 .dynamic-input-area {
-  /* inline-flex로 변경하여 텍스트 길이에 딱 맞게 조절 */
-  display: inline-flex;
+  /* 텍스트 길이에 따라 유동적으로 변하는 핵심 설정 */
+  display: inline-flex; 
   align-items: center;
   justify-content: center;
-  /* 선을 텍스트 길이에 맞게 설정 */
-  border-bottom: 0.5px solid #111;
+  border-bottom: 0.5px solid #111; /* 언더바 */
   padding: 5px 0;
+  cursor: text;
   min-width: 0;
   max-width: 90vw;
-  cursor: text;
+  /* 불필요한 여백 제거 */
+  margin: 0 auto;
 }
 
 .touch-text, .comma-text {
@@ -136,27 +137,29 @@ body {
   letter-spacing: 0.25em;
   color: #111;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .comma-text {
   width: 0;
   opacity: 0;
-  transition: all 0.4s ease;
+  transition: all 0.3s ease;
   display: inline-block;
   overflow: hidden;
 }
 
-/* TOUCH 옆에 쉼표가 붙을 때의 간격 */
+/* TOUCH 옆에 쉼표가 붙을 때의 간격 최소화 */
 .dynamic-input-area.is-active .comma-text {
-  width: 10px;
+  width: 7px; /* 10px에서 조금 더 줄임 */
   opacity: 1;
+  margin-right: 2px;
 }
 
 .input-field-wrapper {
   position: relative;
-  display: flex;
+  display: inline-flex; /* 내부 콘텐츠만큼만 너비 차지 */
   align-items: center;
-  /* 입력창이 늘어날 때 선도 같이 늘어남 */
+  min-width: 0;
 }
 
 input {
@@ -169,26 +172,35 @@ input {
   color: #111;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  z-index: 2;
-  width: 100%;
-  caret-color: #111;
+  /* [핵심] 브라우저 기본 너비를 무시하고 부모(.input-field-wrapper) 크기를 따름 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; 
+  height: 100%;
   padding: 0;
   margin: 0;
+  caret-color: #111;
+  z-index: 2;
 }
 
+/* 텍스트 너비를 실시간으로 계산하여 라인 길이를 결정하는 요소 */
 .input-measure {
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   visibility: hidden;
-  white-space: pre;
+  white-space: pre; /* 공백도 너비에 포함 */
   pointer-events: none;
-  /* 실제 글자 수만큼 공간 확보 */
+  display: inline-block;
+  /* 텍스트가 없을 때 선이 너무 짧아지지 않게 최소 공간 설정 가능 (필요시) */
+  min-width: 2px; 
 }
 
+/* 가짜 커서 제거 */
 .editorial-cursor {
-  display: none !important; /* 가짜 커서 제거 유지 */
+  display: none !important;
 }
 
 .footer-hint {
@@ -205,7 +217,6 @@ input {
   from { opacity: 0; transform: translateY(-2px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 /* --- EVERYTHING & SUBPAGES --- */
 .page-everything { background: #fff; cursor: crosshair; position: relative; }
 canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease; }
