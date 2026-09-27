@@ -29,8 +29,6 @@ function App() {
   const [dotSize, setDotSize] = useState(15);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null); 
-  
-  // [NEW] 슬로건 호버 상태
   const [isSloganHovered, setIsSloganHovered] = useState(false);
 
   const canvasRef = useRef(null);
@@ -145,20 +143,18 @@ function App() {
       {renderNav()}
       <div className="sub-content-scroll">
         <div className="content-area">
-          
           {view === 'overview' && (
             <div className="sub-video-container">
               <div className="video-box">
                 <video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" />
-                <p className="video-label"></p>
+                <p className="video-label">LOGO LOOP</p>
               </div>
               <div className="video-box">
                 <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
-                <p className="video-label"></p>
+                <p className="video-label">LOGO SYSTEM</p>
               </div>
             </div>
           )}
-
           {view === 'about' && (
             <div className="about-editorial-wrap">
               <p className="about-date">2026년 6월 12일, 맑음</p>
@@ -169,23 +165,23 @@ function App() {
                 오늘 마주한 것들을 떠올릴 수 있을까.<br/>
                 브랜드는 어떤 시선을 제안할 수 있을까.
               </div>
-              
-              {/* [수정] 슬로건 영역: 호버 이벤트 추가 */}
               <div 
                 className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
                 onMouseEnter={() => setIsSloganHovered(true)}
                 onMouseLeave={() => setIsSloganHovered(false)}
+                onTouchStart={() => setIsSloganHovered(true)}
+                onTouchEnd={() => setIsSloganHovered(false)}
               >
                 지나친 모든 것에 다시 관심을 기울일 때,<br/>
                 평범한 일상은 새로운 발견이 된다.
               </div>
             </div>
           )}
-
           {(view === 'identity' || view === 'objects') && (
-            <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>
+            <div className="default-sub-wrap">
+               <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>
+            </div>
           )}
-
         </div>
       </div>
       <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
@@ -193,7 +189,6 @@ function App() {
   );
 
   return (
-    // [수정] 슬로건 호버 시 최상위에 클래스 부여
     <div className={`app-root-container ${isSloganHovered ? 'slogan-focus-mode' : ''}`}>
       {view === 'home' && (
         <div className="page-home">
