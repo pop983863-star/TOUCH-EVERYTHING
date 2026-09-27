@@ -35,6 +35,7 @@ function App() {
   const lastInteractionTime = useRef(Date.now()); 
   const subPageActivityTime = useRef(Date.now()); 
   const inputRef = useRef(null);
+  const inputTimeout = useRef(null); // 타이핑 멈춤 감지용 타이머
 
   const preloadImage = (url) => {
     return new Promise((resolve) => {
@@ -44,8 +45,10 @@ function App() {
     });
   };
 
+  // 이미지 검색 함수 (Curated 이미지 쇼 포함)
   const fetchNewImage = async (query = '', color = null) => {
     try {
+      // 쿼리가 비어있으면 서버에서 명예의 전당(Curated) 이미지를 가져오도록 설정됨
       const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
       if (data.images && data.images.length > 0) {
@@ -54,18 +57,29 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
+      // API 오류 시 백업 이미지
+      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
     }
   };
 
+  // [수정] 홈 화면 인터랙션 - 텍스트 입력 시 실시간 이미지 호출 추가
   const handleHomeInteraction = (val) => {
     setInputText(val);
     lastInteractionTime.current = Date.now();
     subPageActivityTime.current = Date.now();
+
+    // 입력이 시작되면 즉시 모드 전환
     if (mode === 'static' && val.trim() !== '') {
       setMode('interactive');
-      fetchNewImage(val);
     }
+
+    // [핵심 추가] 타이핑 중에는 호출하지 않고, 0.6초간 멈췄을 때만 이미지를 가져옴 (Debouncing)
+    if (inputTimeout.current) clearTimeout(inputTimeout.current);
+    inputTimeout.current = setTimeout(() => {
+      if (val.trim() !== '') {
+        fetchNewImage(val);
+      }
+    }, 600);
   };
 
   const moveLogos = useCallback(() => {
@@ -110,20 +124,34 @@ function App() {
       const now = Date.now();
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 12) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } }
-        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
+        if (mode === 'interactive' && diff >= 12) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+        else if (mode === 'static' && diff >= 25 && diff < 55) { 
+          if (mode !== 'slideshow') { 
+            setMode('slideshow'); fetchNewImage(''); // 빈 쿼리로 명예의 전당 이미지 호출
+          } 
+        }
+        else if (mode === 'slideshow' && diff >= 55) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { 
+        setView('home'); setMode('static'); 
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view, isFocused]);
 
   useEffect(() => {
     if (view === 'home' && mode !== 'static' && !isFocused) {
-      const interval = setInterval(() => { moveLogos(); if (mode === 'slideshow') fetchNewImage(''); }, 7500);
+      const interval = setInterval(() => { 
+        moveLogos(); 
+        if (mode === 'slideshow') fetchNewImage(''); 
+        else fetchNewImage(inputText); // 인터랙티브 모드에서도 주기적으로 관련 이미지 교체
+      }, 7500);
       return () => clearInterval(interval);
     }
-  }, [mode, view, moveLogos, isFocused]);
+  }, [mode, view, moveLogos, isFocused, inputText]);
 
   const renderNav = () => (
     <nav className="top-nav">
