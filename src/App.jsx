@@ -1,4 +1,4 @@
-‎import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 
 const COLUMN_STRUCTURE = [3, 4, 3, 4, 3];
