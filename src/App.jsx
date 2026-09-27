@@ -196,39 +196,79 @@ function App() {
         </div>
       )}
 
+     // ... (기존 코드 동일)
+
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
-          <canvas ref={canvasRef} onClick={(e) => {
-            if (isZooming || !imageBuffer.current) return;
-            const rect = canvasRef.current.getBoundingClientRect();
-            const x = Math.floor(e.clientX - rect.left);
-            const y = Math.floor(e.clientY - rect.top);
-            const data = imageBuffer.current.data;
-            const i = (y * canvasRef.current.width + x) * 4;
-            // 클릭한 곳의 컬러 Hex 값 추출
-            const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
-            setSelectedColor(hex); 
-            setIsZooming(true);
-            fetchNewImage(inputText, hex).then(() => { 
-              setTimeout(() => { 
-                setIsZooming(false); 
-                setSelectedColor(null); 
-              }, 1500); 
-            });
-          }} />
+          <canvas 
+            ref={canvasRef} 
+            onClick={(e) => {
+              if (isZooming || !imageBuffer.current) return;
+              
+              try {
+                const canvas = canvasRef.current;
+                const rect = canvas.getBoundingClientRect();
+                
+                // 화면상의 좌표를 캔버스 내부 해상도 좌표로 변환
+                const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+                const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+                
+                const data = imageBuffer.current.data;
+                const i = (y * canvas.width + x) * 4;
+                
+                // 데이터가 유효한지 확인 후 Hex 추출
+                if (data[i] !== undefined) {
+                  const hex = '#' + [data[i], data[i+1], data[i+2]]
+                    .map(val => val.toString(16).padStart(2, '0'))
+                    .join('');
+                  
+                  console.log("Selected Hex:", hex); // 작동 확인용 로그
+                  setSelectedColor(hex.toUpperCase()); 
+                  setIsZooming(true);
+
+                  fetchNewImage(inputText, hex).then(() => { 
+                    // 로딩 시간을 고려하여 조금 더 길게(2초) 유지
+                    setTimeout(() => { 
+                      setIsZooming(false); 
+                      setSelectedColor(null); 
+                    }, 2000); 
+                  });
+                }
+              } catch (err) {
+                console.error("Color pick error:", err);
+                setIsZooming(true);
+                fetchNewImage(inputText).then(() => {
+                  setTimeout(() => setIsZooming(false), 2000);
+                });
+              }
+            }} 
+          />
+
           <div className="halftone-controls-wrapper">
             <div className="halftone-box">
               <span>DENSITY</span>
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-          {/* 컬러 힌트 UI 복구 */}
-          <div className="everything-zoom-hint" style={{ color: selectedColor || '#d1d1d1' }}>
-            {selectedColor ? `ZOOMING INTO ${selectedColor.toUpperCase()}` : 'CLICK ANYWHERE TO EXPLORE COLOR'}
+
+          {/* 컬러 힌트 UI: selectedColor가 있을 때만 강조되도록 수정 */}
+          <div className="everything-zoom-hint">
+            {selectedColor ? (
+              <span style={{ color: selectedColor, fontWeight: '700' }}>
+                ZOOMING INTO {selectedColor}
+              </span>
+            ) : (
+              <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>
+            )}
           </div>
-          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}>
+            <img src="/assets/logo-reference.png" alt="Home" />
+          </div>
         </div>
       )}
+
+// ... (기존 코드 동일)
     </div>
   );
 }
