@@ -7,16 +7,19 @@
 body {
   margin: 0;
   background-color: #ffffff;
-  font-family: sans-serif;
+  font-family: 'Inter', sans-serif;
   overflow: hidden;
 }
 
+/* 최상위 컨테이너: 화면 전체 꽉 채움 */
 .app-root-container {
   width: 100vw;
   height: 100vh;
   display: flex;
+  position: relative;
 }
 
+/* 홈 페이지 레이아웃: 그리드(중앙)와 푸터(하단)를 수직 정렬 */
 .page-home {
   width: 100%;
   height: 100%;
@@ -24,6 +27,7 @@ body {
   flex-direction: column;
 }
 
+/* 그리드가 들어가는 뷰포트: 화면 중앙을 차지 */
 .viewport {
   flex: 1;
   display: flex;
@@ -31,6 +35,7 @@ body {
   justify-content: center;
 }
 
+/* 17개 원 그리드 래퍼 */
 .main-grid-wrapper {
   position: relative;
   width: var(--grid-w);
@@ -42,20 +47,19 @@ body {
   top: 0; left: 0;
   width: 100%; height: 100%;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
-.on {
+.is-active {
   opacity: 1 !important;
   pointer-events: auto !important;
   z-index: 10;
 }
 
 .pixel-perfect {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
+  width: 100%; height: 100%;
+  object-fit: fill; /* 초기 이미지 크기 정밀 매칭 */
   display: block;
 }
 
@@ -69,7 +73,7 @@ body {
   transition: background-image 1.2s ease-in-out;
 }
 
-.moving-logo-marker {
+.logo-overlay-marker {
   position: absolute;
   width: var(--node-size);
   height: var(--node-size);
@@ -80,33 +84,55 @@ body {
   justify-content: center;
 }
 
-.moving-logo-marker img {
-  width: 100%;
-  height: 100%;
+.logo-overlay-marker img {
+  width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transform: scale(1.02);
+  transform: scale(1.02); /* 마스킹 원을 완벽히 덮음 */
 }
 
+/* 푸터 레이아웃: 이미지처럼 화면 맨 아래에 배치 */
 .footer-layout {
-  height: 120px;
+  height: 120px; /* 푸터의 공간 확보 */
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
+/* 입력창 폼: 가늘고 정교한 선과 텍스트 */
 .footer-form {
   border-bottom: 0.5px solid #111;
-  padding: 8px 0;
-  width: 320px;
+  padding: 5px 0;
+  width: 320px; /* 이미지 속 라인 길이 반영 */
 }
 
 input {
-  border: none; outline: none;
+  border: none;
+  outline: none;
   width: 100%;
-  font-size: 10px;
+  font-size: 9px; /* 아주 작은 폰트 크기 */
+  font-weight: 400;
   text-transform: uppercase;
   text-align: center;
   background: transparent;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.2em; /* 폰트 자간 넓게 */
+  color: #111;
 }
+
+/* --- 서브페이지 스타일 (기존 유지) --- */
+.page-sub {
+  position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #fff; z-index: 100; animation: fadeIn 1s ease;
+}
+
+.top-nav { position: absolute; top: 60px; display: flex; gap: 50px; }
+.top-nav button { background: none; border: none; font-size: 11px; font-weight: 800; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
+.top-nav button.on, .top-nav button:hover { color: #000; }
+.sub-title { font-size: 48px; font-weight: 900; margin-bottom: 20px; }
+.sub-desc { font-size: 14px; color: #666; max-width: 400px; text-align: center; line-height: 1.6; }
+.home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; }
+.home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.clickable-logo { cursor: pointer !important; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
