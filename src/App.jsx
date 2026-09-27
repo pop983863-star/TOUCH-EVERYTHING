@@ -44,23 +44,30 @@ function App() {
       img.onload = () => resolve(url); img.onerror = () => resolve(url);
     });
   };
+// ... (기존 코드와 동일)
 
-  // 이미지 검색 함수 (Curated 이미지 쇼 포함)
   const fetchNewImage = async (query = '', color = null) => {
     try {
-      // 쿼리가 비어있으면 서버에서 명예의 전당(Curated) 이미지를 가져오도록 설정됨
-      const res = await fetch(`/api/images?q=${encodeURIComponent(query)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
+      // 쿼리가 있을 때와 없을 때의 차별화
+      const searchQuery = query.trim();
+      const res = await fetch(`/api/images?q=${encodeURIComponent(searchQuery)}${color ? `&color=${encodeURIComponent(color)}` : ''}`);
       const data = await res.json();
+      
       if (data.images && data.images.length > 0) {
-        const nextImgUrl = data.images[Math.floor(Math.random() * data.images.length)];
+        // [핵심] 검색 결과 중 상위 결과만 쓰지 않고 전체 리스트에서 무작위 선택
+        // 이렇게 하면 같은 단어를 쳐도 매번 다른 분위기의 사진이 나옵니다.
+        const randomIndex = Math.floor(Math.random() * data.images.length);
+        const nextImgUrl = data.images[randomIndex];
+        
         await preloadImage(nextImgUrl);
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      // API 오류 시 백업 이미지
       setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
     }
   };
+
+// ... (이후 핸들러 및 렌더링 로직은 기존과 동일)
 
   // [수정] 홈 화면 인터랙션 - 텍스트 입력 시 실시간 이미지 호출 추가
   const handleHomeInteraction = (val) => {
