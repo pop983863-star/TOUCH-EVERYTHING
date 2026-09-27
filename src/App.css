@@ -240,3 +240,33 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* --- 이 부분을 복사해서 .halftone-box 스타일 아래에 넣으세요 --- */
+
+.everything-zoom-hint {
+  position: absolute;
+  bottom: 50px;           /* 화면 아래에서 50px 위 */
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;       /* 텍스트 강조 */
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  z-index: 500;           /* 모든 요소보다 위에 표시 */
+  text-align: center;
+  pointer-events: none;   /* 마우스 클릭 방해 금지 */
+  transition: all 0.4s ease;
+  
+  /* 배경이 어둡거나 밝아도 글자가 보이게 함 */
+  background: rgba(255, 255, 255, 0.85); 
+  padding: 10px 25px;
+  border-radius: 30px;
+  color: #111;            /* 기본 글자색 */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* 줌 인 애니메이션 중일 때 힌트가 살짝 투명해지며 위로 올라가는 효과 (선택사항) */
+.zooming .everything-zoom-hint {
+  opacity: 0.9;
+  transform: translateX(-50%) translateY(-10px);
+}
