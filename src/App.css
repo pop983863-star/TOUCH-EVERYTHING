@@ -10,7 +10,6 @@
 body {
   margin: 0;
   background-color: #ffffff;
-  /* 폰트 전체 적용 */
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
   overflow: hidden;
@@ -20,6 +19,7 @@ body {
 .app-root-container {
   width: 100vw;
   height: 100vh;
+  display: flex;
   position: relative;
 }
 
@@ -45,14 +45,11 @@ body {
   position: relative;
   width: var(--grid-w);
   height: var(--grid-h);
-  transform-origin: center center;
 }
 
-.layer-static,
-.layer-dynamic {
+.layer-static, .layer-dynamic {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: var(--grid-w);
   height: var(--grid-h);
   opacity: 0;
@@ -103,7 +100,7 @@ body {
   transform: scale(1.02);
 }
 
-/* --- FOOTER & DYNAMIC INPUT (글자 잘림 해결 핵심 수정) --- */
+/* --- FOOTER & DYNAMIC INPUT (잘림 현상 완전 해결) --- */
 .footer-layout {
   height: 120px;
   display: flex;
@@ -117,7 +114,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  width: 100%; /* 너비 확장 허용 */
+  width: 100%;
 }
 
 .dynamic-input-area {
@@ -126,14 +123,13 @@ body {
   justify-content: center;
   border-bottom: 0.5px solid #111;
   padding: 5px 0;
-  /* 가로 너비를 화면에 맞춰 유연하게 늘림 */
-  min-width: 100px;
-  max-width: 90vw; 
+  /* 영역 제한을 없애고 텍스트에 따라 자유롭게 늘어나도록 함 */
+  min-width: 10px;
+  max-width: 90vw;
   cursor: text;
-  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.touch-text {
+.touch-text, .comma-text {
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 9px;
   letter-spacing: 0.25em;
@@ -142,15 +138,11 @@ body {
 }
 
 .comma-text {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 9px;
-  color: #111;
   width: 0;
   opacity: 0;
   transition: all 0.4s ease;
   display: inline-block;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .dynamic-input-area.is-active .comma-text {
@@ -163,53 +155,43 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  flex-grow: 1; /* 텍스트가 늘어나면 공간을 채우도록 함 */
+  /* 가짜 커서 등이 자리를 차지하지 않도록 최소화 */
 }
 
 input {
   font-family: 'IBM Plex Sans', sans-serif;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  font-size: 9px; /* 스케일 대신 직접 폰트 사이즈 지정하여 버그 방지 */
+  font-weight: 400;
   background: transparent;
   border: none;
   outline: none;
-  /* 폰트 크기와 스케일 조절로 잘림 방지 */
-  font-size: 16px; 
-  color: #111; /* 잘 보이게 짙은 색으로 변경 */
+  color: #111;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  /* 0.5625배 축소하여 9px 처럼 보이게 하되 가독성 유지 */
-  transform: scale(0.5625);
-  transform-origin: left center;
+  letter-spacing: 0.2em;
   z-index: 2;
-  white-space: nowrap;
+  width: 100%;
+  /* [해결] 브라우저 기본 커서를 검은색 얇은 선으로 디자인에 맞춤 */
+  caret-color: #111; 
+  padding: 0;
+  margin: 0;
 }
 
-/* 입력창이 늘어날 때 공간을 확보해주는 측정기 */
+/* 텍스트 너비를 측정해서 input의 길이를 늘려주는 요소 */
 .input-measure {
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   visibility: hidden;
   white-space: pre;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  min-width: 2px; /* 아주 좁아지지 않게 */
-  padding-right: 2px;
+  pointer-events: none;
+  /* input이 이 너비를 정확히 따라가도록 함 */
 }
 
+/* [문제의 원인 해결] 중복되는 가짜 커서를 화면에서 완전히 제거 */
 .editorial-cursor {
-  width: 1px;
-  height: 10px;
-  background: #111;
-  margin-left: 1px;
-  animation: blink 1s step-end infinite;
-  flex-shrink: 0;
+  display: none !important;
 }
-
-@keyframes blink { 50% { opacity: 0; } }
 
 .footer-hint {
   font-family: 'IBM Plex Sans', sans-serif;
@@ -240,20 +222,18 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
 .halftone-controls-wrapper:hover input[type="range"] { opacity: 1; }
 .halftone-box input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: #000; border-radius: 50%; cursor: pointer; }
 
-/* 서브페이지 제목 및 내용 */
 .page-sub { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 100; animation: fadeIn 1s ease; }
 .top-nav { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; z-index: 200; }
 .top-nav button { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; background: none; border: none; font-size: 11px; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
 .top-nav button.active, .top-nav button:hover { color: #000; }
 
-.sub-title { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 48px; margin-bottom: 20px; letter-spacing: -0.01em; }
+.sub-title { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 48px; margin-bottom: 20px; }
 .sub-desc { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #666; max-width: 320px; text-align: center; line-height: 1.6; }
 
 .home-back-btn { position: absolute; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 200; transition: transform 0.3s ease; }
 .home-back-btn:hover { transform: scale(1.1); }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* --- RESPONSIVE --- */
 @media (max-width: 600px) {
   .main-grid-wrapper { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.72); }
   .top-nav { gap: 20px; top: 40px; width: 100%; justify-content: center; }
