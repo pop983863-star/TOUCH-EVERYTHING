@@ -19,7 +19,7 @@ const generateGridNodes = () => {
 
 function App() {
   const [view, setView] = useState('home'); 
-  const [lastSubView, setLastSubView] = useState('overview');
+  const [lastSubView, setLastSubView] = useState('about');
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [nodes] = useState(generateGridNodes());
@@ -65,9 +65,15 @@ function App() {
     setInputText(val);
     lastInteractionTime.current = Date.now();
     subPageActivityTime.current = Date.now();
-    if (mode === 'static' && val.trim() !== '') setMode('interactive');
+
+    if (mode === 'static' && val.trim() !== '') {
+      setMode('interactive');
+    }
+
     if (inputTimeout.current) clearTimeout(inputTimeout.current);
-    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
+    inputTimeout.current = setTimeout(() => {
+      if (val.trim() !== '') fetchNewImage(val);
+    }, 600);
   };
 
   const moveLogos = useCallback(() => {
@@ -112,17 +118,28 @@ function App() {
       const now = Date.now();
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 12) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } }
-        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
+        if (mode === 'interactive' && diff >= 12) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+        else if (mode === 'static' && diff >= 25 && diff < 55) { 
+          if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } 
+        }
+        else if (mode === 'slideshow' && diff >= 55) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { 
+        setView('home'); setMode('static'); 
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view, isFocused]);
 
   useEffect(() => {
     if (view === 'home' && mode !== 'static' && !isFocused) {
-      const interval = setInterval(() => { moveLogos(); fetchNewImage(mode === 'slideshow' ? '' : inputText); }, 7500);
+      const interval = setInterval(() => { 
+        moveLogos(); 
+        fetchNewImage(mode === 'slideshow' ? '' : inputText); 
+      }, 7500);
       return () => clearInterval(interval);
     }
   }, [mode, view, moveLogos, isFocused, inputText]);
@@ -138,47 +155,6 @@ function App() {
     </nav>
   );
 
-  const renderSubPage = (title, description) => (
-    <div className="page-sub">
-      {renderNav()}
-      <div className="sub-content-scroll">
-        <div className="content-area">
-          {view === 'overview' && (
-            <div className="sub-video-container">
-              <div className="video-box"><video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" /></div>
-              <div className="video-box"><video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" /></div>
-            </div>
-          )}
-          {view === 'about' && (
-            <div className="about-editorial-wrap">
-              <p className="about-date">2026년 6월 12일, 맑음</p>
-              <h2 className="about-question">당신은 무엇에 주의를 기울이고 있나요?</h2>
-              <div className="about-body">
-                그 어느 때보다 많은 정보와 콘텐츠에 접근할 수 있게 되었다.<br/>
-                새로운 것을 발견하는 일은 쉬워졌지만, 정작 우리 주변의 익숙한 것들은 관심 밖으로 밀려나고 있다.<br/><br/>
-                오늘 마주한 것들을 떠올릴 수 있을까.<br/>
-                브랜드는 어떤 시선을 제안할 수 있을까.
-              </div>
-              
-              {/* 음악 위젯 공간 확보 */}
-              <div className="audio-placeholder"></div>
-
-              <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
-                onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
-                onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
-              >
-                지나친 모든 것에 다시 관심을 기울일 때,<br/>
-                평범한 일상은 새로운 발견이 된다.
-              </div>
-            </div>
-          )}
-          {(view === 'identity' || view === 'objects') && <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>}
-        </div>
-      </div>
-      <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
-    </div>
-  );
-
   return (
     <div className={`app-root-container ${isSloganHovered ? 'slogan-focus-mode' : ''} view-${view}`}>
       {view === 'home' && (
@@ -191,10 +167,7 @@ function App() {
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
                 ))}
                 {activeIndices.map((idx, i) => (
-                  <div key={i} className="logo-overlay-marker clickable" style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }} 
-                    onClick={() => { setView('overview'); setLastSubView('overview'); }}>
-                    <img src="/assets/logo-reference.png" alt="Logo" />
-                  </div>
+                  <div key={i} className="logo-overlay-marker clickable" style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }} onClick={() => { setView('overview'); setLastSubView('overview'); }}><img src="/assets/logo-reference.png" alt="Logo" /></div>
                 ))}
               </div>
             </div>
@@ -202,7 +175,8 @@ function App() {
           <footer className="footer-layout">
             <div className="footer-container">
               <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-text">TOUCH</span><span className="comma-text">,</span>
+                <span className="touch-text">TOUCH</span>
+                <span className="comma-text">,</span>
                 <div className="input-field-wrapper">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
                   <span className="input-measure">{inputText}</span>
@@ -214,7 +188,51 @@ function App() {
         </div>
       )}
 
-      {['overview', 'about', 'identity', 'objects'].includes(view) && renderSubPage(view.toUpperCase(), `Content for ${view} page.`)}
+      {['overview', 'about', 'identity', 'objects'].includes(view) && (
+        <div className="page-sub">
+          {renderNav()}
+          <div className="sub-content-scroll">
+            <div className="content-area">
+              {view === 'overview' && (
+                <div className="sub-video-container">
+                  <div className="video-box"><video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" /></div>
+                  <div className="video-box"><video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" /></div>
+                </div>
+              )}
+              {view === 'about' && (
+                <div className="about-editorial-wrap">
+                  <p className="about-date">2026년 6월 12일, 맑음</p>
+                  <h2 className="about-question">당신은 무엇에 주의를 기울이고 있나요?</h2>
+                  <div className="about-body">
+                    그 어느 때보다 많은 정보와 콘텐츠에 접근할 수 있게 되었다.<br/>
+                    새로운 것을 발견하는 일은 쉬워졌지만, 정작 우리 주변의 익숙한 것들은 관심 밖으로 밀려나고 있다.<br/><br/>
+                    오늘 마주한 것들을 떠올릴 수 있을까.<br/>
+                    브랜드는 어떤 시선을 제안할 수 있을까.
+                  </div>
+                  
+                  {/* 음악 위젯 공간 확보용 플레이스홀더 */}
+                  <div className="audio-placeholder"></div>
+
+                  <div 
+                    className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
+                    onMouseEnter={() => setIsSloganHovered(true)}
+                    onMouseLeave={() => setIsSloganHovered(false)}
+                    onTouchStart={() => setIsSloganHovered(true)}
+                    onTouchEnd={() => setIsSloganHovered(false)}
+                  >
+                    지나친 모든 것에 다시 관심을 기울일 때,<br/>
+                    평범한 일상은 새로운 발견이 된다.
+                  </div>
+                </div>
+              )}
+              {(view === 'identity' || view === 'objects') && (
+                <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>
+              )}
+            </div>
+          </div>
+          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
+        </div>
+      )}
 
       {view === 'everything' && (
         <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
@@ -245,9 +263,9 @@ function App() {
         </div>
       )}
 
-      {/* 영속적 오디오 플레이어 (모든 페이지 상위 배치) */}
+      {/* [NEW] 영속적 오디오 플레이어: 모든 뷰 바깥에 존재하여 재생 연속성 보장 */}
       <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'visible' : 'hidden'}`}>
-        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" frameBorder="0" allow="encrypted-media; fullscreen; autoplay; idle-detection; speaker-selection; web-share;"></iframe>
+        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&autoplay=1" frameBorder="0" allow="encrypted-media; fullscreen; autoplay; idle-detection; speaker-selection; web-share;"></iframe>
       </div>
     </div>
   );
