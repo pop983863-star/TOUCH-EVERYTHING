@@ -151,6 +151,17 @@ function App() {
               <div className="video-box">
                 <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
               </div>
+              
+              {/* [NEW] Mixcloud 오디오 플레이어 추가 */}
+              <div className="audio-player-box">
+                <iframe 
+                  width="100%" 
+                  height="120" 
+                  src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-3%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" 
+                  frameBorder="0" 
+                  allow="encrypted-media; fullscreen; autoplay; idle-detection; speaker-selection; web-share;"
+                ></iframe>
+              </div>
             </div>
           )}
           {view === 'about' && (
@@ -215,7 +226,6 @@ function App() {
                   <span className="input-measure">{inputText}</span>
                 </div>
               </div>
-              {/* 회색 서서히 뜨는 힌트 복구 */}
               {(mode !== 'static' || inputText) && <div className="footer-hint">TOUCH SYMBOL</div>}
             </div>
           </footer>
