@@ -145,15 +145,10 @@ function App() {
         <div className="content-area">
           {view === 'overview' && (
             <div className="sub-video-container">
-              <div className="video-box">
-                <video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" />
-              </div>
-              <div className="video-box">
-                <video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" />
-              </div>
+              <div className="video-box"><video src="/assets/logo-loop.mp4" autoPlay loop muted playsInline className="brand-video" /></div>
+              <div className="video-box"><video src="/assets/logo-system.mp4" autoPlay loop muted playsInline className="brand-video" /></div>
             </div>
           )}
-          
           {view === 'about' && (
             <div className="about-editorial-wrap">
               <p className="about-date">2026년 6월 12일, 맑음</p>
@@ -165,32 +160,19 @@ function App() {
                 브랜드는 어떤 시선을 제안할 수 있을까.
               </div>
               
-              {/* [이동] ABOUT 페이지 본문 아래에 Mixcloud 플레이어 배치 */}
-              <div className="audio-player-box">
-                <iframe 
-                  width="100%" height="120" 
-                  src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-3%2F" 
-                  frameBorder="0" allow="encrypted-media"
-                ></iframe>
-              </div>
+              {/* 음악 위젯 공간 확보 */}
+              <div className="audio-placeholder"></div>
 
-              <div 
-                className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
-                onMouseEnter={() => setIsSloganHovered(true)}
-                onMouseLeave={() => setIsSloganHovered(false)}
-                onTouchStart={() => setIsSloganHovered(true)}
-                onTouchEnd={() => setIsSloganHovered(false)}
+              <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
+                onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
+                onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
               >
                 지나친 모든 것에 다시 관심을 기울일 때,<br/>
                 평범한 일상은 새로운 발견이 된다.
               </div>
             </div>
           )}
-          {(view === 'identity' || view === 'objects') && (
-            <div className="default-sub-wrap">
-               <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>
-            </div>
-          )}
+          {(view === 'identity' || view === 'objects') && <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>}
         </div>
       </div>
       <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
@@ -198,7 +180,7 @@ function App() {
   );
 
   return (
-    <div className={`app-root-container ${isSloganHovered ? 'slogan-focus-mode' : ''}`}>
+    <div className={`app-root-container ${isSloganHovered ? 'slogan-focus-mode' : ''} view-${view}`}>
       {view === 'home' && (
         <div className="page-home">
           <div className="viewport">
@@ -222,7 +204,6 @@ function App() {
               <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-text">TOUCH</span><span className="comma-text">,</span>
                 <div className="input-field-wrapper">
-                  {/* [수정] 텍스트 잘림 방지 로직 강화 */}
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
                   <span className="input-measure">{inputText}</span>
                 </div>
@@ -258,4 +239,18 @@ function App() {
             </div>
           </div>
           <div className="everything-zoom-hint">
-            {selectedColor ? <span style={{ co
+            {selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>}
+          </div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+        </div>
+      )}
+
+      {/* 영속적 오디오 플레이어 (모든 페이지 상위 배치) */}
+      <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'visible' : 'hidden'}`}>
+        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" frameBorder="0" allow="encrypted-media; fullscreen; autoplay; idle-detection; speaker-selection; web-share;"></iframe>
+      </div>
+    </div>
+  );
+}
+
+export default App;
