@@ -228,4 +228,26 @@ function App() {
               const hex = '#' + [data[i], data[i+1], data[i+2]].map(val => val.toString(16).padStart(2, '0')).join('');
               setSelectedColor(hex.toUpperCase()); setIsZooming(true);
               fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
-            } catch(err) { setIsZooming(true); fetchNewImage(inputTex
+            } catch(err) { setIsZooming(true); fetchNewImage(inputText).then(() => { setTimeout(() => setIsZooming(false), 2000); }); }
+          }} />
+          <div className="halftone-controls-outer">
+            <div className="halftone-box">
+              <span>DENSITY</span>
+              <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
+            </div>
+          </div>
+          <div className="everything-zoom-hint">
+            {selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>}
+          </div>
+          <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
+        </div>
+      )}
+
+      <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'visible' : 'hidden'}`}>
+        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&autoplay=1" frameBorder="0" allow="autoplay"></iframe>
+      </div>
+    </div>
+  );
+}
+
+export default App;
