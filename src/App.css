@@ -18,7 +18,7 @@ body {
 /* --- INTRO GRID --- */
 .page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
 .viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
-.main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); }
+.main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
 .layer-static, .layer-dynamic { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
 .on { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
 .pixel-perfect { width: 100%; height: 100%; object-fit: fill; display: block; }
@@ -45,48 +45,48 @@ body {
 .comma-text { width: 0; opacity: 0; transition: all 0.3s ease; display: inline-block; overflow: hidden; }
 .dynamic-input-area.is-active .comma-text { width: 7px; opacity: 1; margin-right: 2px; }
 .input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 0; }
-input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 400; background: transparent; border: none; outline: none; color: #111; text-transform: uppercase; letter-spacing: 0.2em; position: absolute; top: 0; left: 0; width: 100%; height: 100%; caret-color: #111; z-index: 2; }
-.input-measure { font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; text-transform: uppercase; min-width: 2px; }
-.editorial-cursor { display: none !important; }
-.footer-hint { font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 3s forwards; }
+input {
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 400; background: transparent; border: none; outline: none;
+  color: #111; text-transform: uppercase; letter-spacing: 0.15em; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  caret-color: #111; z-index: 2; padding: 0; margin: 0; transform: scale(0.5625); transform-origin: left center;
+}
+.input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; text-transform: uppercase; min-width: 2px; }
+.footer-hint { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 2s forwards; }
 @keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 
 /* --- SUBPAGE LAYOUT --- */
 .page-sub { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 100; animation: fadeIn 1s ease; }
-.top-nav { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; z-index: 200; width: auto; justify-content: center; }
+.top-nav { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; z-index: 200; }
 .top-nav button { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; background: none; border: none; font-size: 11px; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
-.top-nav button.active, .top-nav button:hover { color: #000; }
+.top-nav button.active { color: #000; }
 
-.sub-content-scroll { width: 100%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 140px 20px 180px 20px; scrollbar-width: none; }
+.sub-content-scroll { width: 100%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 140px 20px 120px 20px; scrollbar-width: none; }
 .sub-content-scroll::-webkit-scrollbar { display: none; }
 
-.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; }
-.video-box { width: 496px; height: 396px; position: relative; flex-shrink: 0; }
+.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; align-items: center; }
+.video-box { width: var(--grid-w); height: var(--grid-h); position: relative; flex-shrink: 0; }
 .brand-video { width: 100%; height: 100%; object-fit: cover; background-color: #f0f0f0; display: block; }
-.video-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; color: #bbb; margin-top: 15px; text-align: center; }
 
-/* ABOUT EDITORIAL & FOCUS MODE */
+/* [NEW] 오디오 플레이어 박스 스타일 */
+.audio-player-box {
+  width: var(--grid-w); /* 영상 너비와 일치 */
+  margin: 20px 0 60px 0;
+  border: 0.5px solid #eee; /* 아주 연한 테두리 */
+}
+
 .about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 40px; }
 .about-date { font-size: 11px; letter-spacing: 0.1em; color: #999; margin-bottom: 30px; }
 .about-question { font-size: 24px; font-weight: 700; margin-bottom: 40px; color: #111; }
 .about-body { font-size: 14px; line-height: 2.2; color: #444; font-weight: 400; letter-spacing: -0.01em; }
-
-.about-slogan-text { 
-  margin-top: 190px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; 
-  line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
-  cursor: help; text-align: center; 
-}
+.about-slogan-text { margin-top: 190px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; }
 
 .slogan-focus-mode .page-sub { background-color: #000 !important; }
 .slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.05); }
-.slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, 
-.slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn, .slogan-focus-mode .sub-desc { opacity: 0 !important; pointer-events: none; }
+.slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
 
-.sub-desc { font-size: 14px; color: #666; max-width: 320px; text-align: center; line-height: 1.6; margin-top: 20px; }
 .home-back-btn { position: fixed !important; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 500; transition: transform 0.3s ease; }
 .home-back-btn:hover { transform: scale(1.1); }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-
 
 /* EVERYTHING */
 .page-everything { background: #fff; cursor: crosshair; position: relative; width: 100vw; height: 100vh; overflow: hidden; }
@@ -97,41 +97,30 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
 .halftone-box span { font-size: 8px; font-weight: 700; color: #888; letter-spacing: 0.2em; }
 .halftone-box input[type="range"] { width: 140px; -webkit-appearance: none; height: 1px; background: #ddd; outline: none; }
 .halftone-box input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: #000; border-radius: 50%; cursor: pointer; }
-.everything-zoom-hint { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; z-index: 500; background: rgba(255,255,255,0.85); padding: 10px 25px; border-radius: 30px; color: #111; }
+.everything-zoom-hint { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); font-family: 'IBM Plex Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; z-index: 500; background: rgba(255,255,255,0.85); padding: 10px 25px; border-radius: 30px; color: #111; }
 
 .clickable { cursor: pointer !important; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* --- 📱 MOBILE RESPONSIVE UPDATES --- */
+/* --- 📱 MOBILE RESPONSIVE --- */
 @media (max-width: 600px) {
-  /* 인트로 그리드와 로고 비율 일치하도록 스케일 적용 */
-  .main-grid-wrapper { 
-    transform: scale(0.65); 
-    transform-origin: center center; 
-  }
-  
+  .main-grid-wrapper { transform: scale(0.68); transform-origin: center center; margin: 0 auto; left: 0; right: 0; }
+  .logo-overlay-marker img { object-ratio: 1/1; width: 100%; height: 100%; }
   .top-nav { gap: 15px; top: 30px; width: 95%; }
   .top-nav button { font-size: 9px; letter-spacing: 0.15em; }
-
   .sub-content-scroll { padding: 110px 15px 120px 15px; }
-
-  /* 비디오 박스 역시 모바일에서 그리드와 일치하는 비율로 축소 */
-  .video-box { 
-    width: calc(var(--grid-w) * 0.65); 
-    height: calc(var(--grid-h) * 0.65);
+  
+  /* 모바일에서도 영상과 오디오 플레이어 너비 유지 */
+  .video-box, .audio-player-box { 
+    width: calc(var(--grid-w) * 0.68); 
+    height: auto;
     margin: 0 auto;
   }
+  .video-box { height: calc(var(--grid-h) * 0.68); }
 
   .about-question { font-size: 18px; line-height: 1.4; padding: 0 10px; }
   .about-body { font-size: 12px; line-height: 2.2; padding: 0 10px; text-align: justify; }
-  .about-slogan-text { 
-    margin-top: 100px; 
-    padding: 30px 20px; 
-    font-size: 13px; 
-    width: 85vw; 
-  }
-
+  .about-slogan-text { margin-top: 100px; padding: 30px 20px; font-size: 13px; width: 85vw; }
   .footer-layout { height: 100px; }
-  
   .home-back-btn { right: 20px; bottom: 20px; width: 45px; height: 45px; }
 }
