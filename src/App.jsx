@@ -159,17 +159,16 @@ function App() {
                 오늘 마주한 것들을 떠올릴 수 있을까.<br/>
                 브랜드는 어떤 시선을 제안할 수 있을까.
               </div>
-              
-              {/* 음악 위젯이 들어갈 고정된 공간 확보용 앵커 */}
-              <div className="audio-anchor-point"></div>
-
-              <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
+              <div 
+                className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
                 onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
                 onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
               >
                 지나친 모든 것에 다시 관심을 기울일 때,<br/>
                 평범한 일상은 새로운 발견이 된다.
               </div>
+              {/* 음악 위젯의 시각적 위치를 위한 앵커 포인트 */}
+              <div className="audio-anchor-point"></div>
             </div>
           )}
           {(view === 'identity' || view === 'objects') && <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>}
@@ -245,14 +244,13 @@ function App() {
         </div>
       )}
 
-      {/* [NEW] 영속적 음악 위젯: 홈(외부 초기화면)이 아닐 때만 생성됨 */}
+      {/* 영속적 오디오 플레이어: 홈(인트로)이 아닐 때만 존재하여 재생 유지 */}
       {view !== 'home' && (
         <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'is-about-view' : 'is-hidden-view'}`}>
           <iframe 
             width="100%" height="120" 
             src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" 
-            frameBorder="0" 
-            allow="encrypted-media; fullscreen; speaker-selection; web-share;"
+            frameBorder="0" allow="encrypted-media; speaker-selection; web-share;"
           ></iframe>
         </div>
       )}
