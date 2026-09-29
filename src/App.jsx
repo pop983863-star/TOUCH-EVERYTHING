@@ -65,9 +65,15 @@ function App() {
     setInputText(val);
     lastInteractionTime.current = Date.now();
     subPageActivityTime.current = Date.now();
-    if (mode === 'static' && val.trim() !== '') setMode('interactive');
+
+    if (mode === 'static' && val.trim() !== '') {
+      setMode('interactive');
+    }
+
     if (inputTimeout.current) clearTimeout(inputTimeout.current);
-    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
+    inputTimeout.current = setTimeout(() => {
+      if (val.trim() !== '') fetchNewImage(val);
+    }, 600);
   };
 
   const moveLogos = useCallback(() => {
@@ -112,17 +118,28 @@ function App() {
       const now = Date.now();
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
-        if (mode === 'interactive' && diff >= 12) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } }
-        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); }
-      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { setView('home'); setMode('static'); }
+        if (mode === 'interactive' && diff >= 12) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+        else if (mode === 'static' && diff >= 25 && diff < 55) { 
+          if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage(''); } 
+        }
+        else if (mode === 'slideshow' && diff >= 55) { 
+          setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); 
+        }
+      } else if (view !== 'home' && (now - subPageActivityTime.current) / 1000 >= 180) { 
+        setView('home'); setMode('static'); 
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, [mode, view, isFocused]);
 
   useEffect(() => {
     if (view === 'home' && mode !== 'static' && !isFocused) {
-      const interval = setInterval(() => { moveLogos(); fetchNewImage(mode === 'slideshow' ? '' : inputText); }, 7500);
+      const interval = setInterval(() => { 
+        moveLogos(); 
+        fetchNewImage(mode === 'slideshow' ? '' : inputText); 
+      }, 7500);
       return () => clearInterval(interval);
     }
   }, [mode, view, moveLogos, isFocused, inputText]);
@@ -170,7 +187,11 @@ function App() {
               </div>
             </div>
           )}
-          {(view === 'identity' || view === 'objects') && <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>}
+          {(view === 'identity' || view === 'objects') && (
+            <div className="default-sub-wrap">
+               <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>
+            </div>
+          )}
         </div>
       </div>
       <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
@@ -243,8 +264,9 @@ function App() {
         </div>
       )}
 
-      <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'visible' : 'hidden'}`}>
-        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&autoplay=1" frameBorder="0" allow="autoplay"></iframe>
+      {/* 영속적 오디오 플레이어: &autoplay=1 추가 */}
+      <div className={`persistent-audio-player ${view !== 'home' && view !== 'everything' && !isSloganHovered ? 'visible' : 'hidden'}`}>
+        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&autoplay=1" frameBorder="0" allow="autoplay; encrypted-media"></iframe>
       </div>
     </div>
   );
