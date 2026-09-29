@@ -15,9 +15,17 @@ body {
 
 .app-root-container { width: 100vw; height: 100vh; position: relative; }
 
-/* --- [복구] GRID & VIEWPORT 중앙 고정 --- */
+/* --- [복구] 1:50 버전 그리드 레이아웃: 화면 40% 지점에 안착 --- */
 .page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
-.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+.viewport { 
+  flex: 1; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 100%; 
+  padding-bottom: 10vh; /* 에디토리얼 비율을 위한 아래쪽 여백 */
+}
+
 .main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
 .layer-static, .layer-dynamic { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
 .on { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
@@ -37,13 +45,25 @@ body {
 }
 .logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
 
-/* --- [복구] FOOTER & DYNAMIC INPUT (가변 언더바 & 9px 고정) --- */
-.footer-layout { height: 120px; display: flex; justify-content: center; align-items: flex-start; width: 100%; }
-.footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; width: auto; }
+/* --- [복구] 1:50 버전 텍스트 입력창: 가변 언더바 & 9px 고정 --- */
+.footer-layout { 
+  position: absolute; 
+  bottom: 80px; /* 이미지 속의 낮은 배치 재현 */
+  width: 100%; 
+  display: flex; 
+  justify-content: center; 
+}
+.footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
 .dynamic-input-area {
-  display: inline-flex; align-items: center; justify-content: center;
-  border-bottom: 0.5px solid #111; padding: 5px 0; min-width: 0; max-width: 90vw; cursor: text;
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-bottom: 0.5px solid #111; /* 아주 얇고 정교한 선 */
+  padding: 5px 0; 
+  min-width: 0; 
+  max-width: 90vw; 
+  cursor: text;
 }
 .touch-text, .comma-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; letter-spacing: 0.25em; color: #111; flex-shrink: 0; }
 .comma-text { width: 0; opacity: 0; transition: all 0.3s ease; display: inline-block; overflow: hidden; }
@@ -52,53 +72,48 @@ body {
 .input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 2px; flex-grow: 1; }
 input {
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 9px; /* 스케일 방식 제거하고 직접 크기 부여 */
+  font-size: 9px; /* 직접 사이즈 지정으로 잘림 현상 방지 */
   font-weight: 400; background: transparent; border: none; outline: none;
   color: #111; text-transform: uppercase; letter-spacing: 0.2em;
-  width: 100%; padding: 0; margin: 0; caret-color: #111; z-index: 2;
+  width: 100%; padding: 0; margin: 0; caret-color: #111;
 }
 .input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; text-transform: uppercase; min-width: 1px; padding-right: 5px; }
 
 .footer-hint { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 2s forwards; }
 @keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- SUBPAGE LAYOUT --- */
+/* --- 서브페이지 및 기타 스타일 유지 --- */
 .page-sub { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 100; animation: fadeIn 1s ease; }
 .top-nav { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; z-index: 200; }
 .top-nav button { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; background: none; border: none; font-size: 11px; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
 .top-nav button.active { color: #000; }
 .sub-content-scroll { width: 100%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 140px 20px 120px 20px; scrollbar-width: none; }
 .sub-content-scroll::-webkit-scrollbar { display: none; }
-.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; align-items: center; }
-.video-box { width: var(--grid-w); height: var(--grid-h); position: relative; flex-shrink: 0; background-color: #f0f0f0; }
-.brand-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* [해결] ABOUT EDITORIAL & AUDIO IN-PAGE */
-.about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 40px; width: 100%; }
-.about-date { font-size: 11px; letter-spacing: 0.1em; color: #999; margin-bottom: 30px; }
-.about-question { font-size: 24px; font-weight: 700; margin-bottom: 40px; color: #111; }
-.about-body { font-size: 14px; line-height: 2.2; color: #444; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 60px; }
-
-/* 위젯을 본문 흐름 맨 하단에 안착 */
+/* [수정] 음악 위젯: About 페이지 본문 흐름 하단에 안착 */
 .about-audio-widget-inpage {
   width: var(--grid-w);
   margin-top: 20px;
   margin-bottom: 100px;
 }
 
-.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 80px; }
+.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; align-items: center; }
+.video-box { width: var(--grid-w); height: var(--grid-h); position: relative; flex-shrink: 0; background-color: #f0f0f0; }
+.brand-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 40px; width: 100%; }
+.about-date { font-size: 11px; letter-spacing: 0.1em; color: #999; margin-bottom: 30px; }
+.about-question { font-size: 24px; font-weight: 700; margin-bottom: 40px; color: #111; }
+.about-body { font-size: 14px; line-height: 2.2; color: #444; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 60px; }
+.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 40px; }
+
 .slogan-focus-mode .page-sub { background-color: #000 !important; }
 .slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.05); }
 .slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
 
 .home-back-btn { position: fixed !important; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 500; transition: transform 0.3s ease; }
-.home-back-btn:hover { transform: scale(1.1); }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* [해결] 덴시티 제어 박스: 절반 사이즈 + 호버 시 중앙 노출 유지 */
-.page-everything { background: #fff; cursor: crosshair; position: relative; width: 100vw; height: 100vh; overflow: hidden; }
-canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease; }
-.zooming canvas { transform: scale(12); filter: blur(30px); opacity: 0; }
+/* 덴시티 제어 박스 (해결 버전 유지) */
 .halftone-controls-outer { position: fixed; bottom: 100px; width: 100%; display: flex; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
 .halftone-controls-outer:hover { opacity: 1; }
 .halftone-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 4px 20px rgba(0,0,0,0.05); pointer-events: auto; min-width: 110px; }
@@ -121,6 +136,6 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
   .about-question { font-size: 18px; line-height: 1.4; padding: 0 10px; }
   .about-body { font-size: 12px; line-height: 2.2; padding: 0 10px; text-align: justify; }
   .about-slogan-text { margin-top: 60px; padding: 30px 20px; font-size: 13px; width: 85vw; }
-  .footer-layout { height: 100px; }
+  .footer-layout { height: 100px; position: absolute; bottom: 40px; }
   .home-back-btn { right: 20px; bottom: 20px; width: 45px; height: 45px; }
 }
