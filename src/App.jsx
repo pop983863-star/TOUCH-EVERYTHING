@@ -168,7 +168,7 @@ function App() {
                 평범한 일상은 새로운 발견이 된다.
               </div>
 
-              {/* [해결] 음악 위젯: About 페이지 슬로건 아래 본문 흐름에 고정 */}
+              {/* [수정] 음악 위젯: 페이지 내부 하단에 고정 배치 */}
               <div className="about-audio-widget-inpage">
                 <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" frameBorder="0" allow="encrypted-media; fullscreen; speaker-selection; web-share;"></iframe>
               </div>
