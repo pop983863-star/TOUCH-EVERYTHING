@@ -159,9 +159,11 @@ function App() {
                 오늘 마주한 것들을 떠올릴 수 있을까.<br/>
                 브랜드는 어떤 시선을 제안할 수 있을까.
               </div>
-              <div className="audio-placeholder"></div>
-              <div 
-                className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
+              
+              {/* 음악 위젯이 들어갈 고정된 공간 확보용 앵커 */}
+              <div className="audio-anchor-point"></div>
+
+              <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
                 onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
                 onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
               >
@@ -230,15 +232,12 @@ function App() {
               fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
             } catch(err) { setIsZooming(true); fetchNewImage(inputText).then(() => { setTimeout(() => setIsZooming(false), 2000); }); }
           }} />
-          
-          {/* [핵심] 덴시티 제어 박스 구조 */}
           <div className="halftone-controls-outer">
             <div className="halftone-box">
               <span>DENSITY</span>
               <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
             </div>
           </div>
-
           <div className="everything-zoom-hint">
             {selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>}
           </div>
@@ -246,9 +245,17 @@ function App() {
         </div>
       )}
 
-      <div className={`fixed-audio-player ${view === 'about' && !isSloganHovered ? 'is-visible' : 'is-hidden'}`}>
-        <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&autoplay=1" frameBorder="0" allow="autoplay; encrypted-media"></iframe>
-      </div>
+      {/* [NEW] 영속적 음악 위젯: 홈(외부 초기화면)이 아닐 때만 생성됨 */}
+      {view !== 'home' && (
+        <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'is-about-view' : 'is-hidden-view'}`}>
+          <iframe 
+            width="100%" height="120" 
+            src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" 
+            frameBorder="0" 
+            allow="encrypted-media; fullscreen; speaker-selection; web-share;"
+          ></iframe>
+        </div>
+      )}
     </div>
   );
 }
