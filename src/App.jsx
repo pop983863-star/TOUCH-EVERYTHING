@@ -57,7 +57,7 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
     }
   };
 
@@ -159,6 +159,7 @@ function App() {
                 오늘 마주한 것들을 떠올릴 수 있을까.<br/>
                 브랜드는 어떤 시선을 제안할 수 있을까.
               </div>
+              
               <div 
                 className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
                 onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
@@ -167,8 +168,11 @@ function App() {
                 지나친 모든 것에 다시 관심을 기울일 때,<br/>
                 평범한 일상은 새로운 발견이 된다.
               </div>
-              {/* 음악 위젯의 시각적 위치를 위한 앵커 포인트 */}
-              <div className="audio-anchor-point"></div>
+
+              {/* [수정] 음악 위젯: About 페이지 본문 흐름 맨 하단에 고정 삽입 */}
+              <div className="about-audio-container">
+                <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" frameBorder="0" allow="encrypted-media; fullscreen; speaker-selection; web-share;"></iframe>
+              </div>
             </div>
           )}
           {(view === 'identity' || view === 'objects') && <p className="sub-desc">Experimental Design System for {view.toUpperCase()}.</p>}
@@ -241,17 +245,6 @@ function App() {
             {selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span style={{ color: '#888' }}>CLICK ANYWHERE TO EXPLORE COLOR</span>}
           </div>
           <div className="home-back-btn" onClick={() => setView(lastSubView)}><img src="/assets/logo-reference.png" alt="Home" /></div>
-        </div>
-      )}
-
-      {/* 영속적 오디오 플레이어: 홈(인트로)이 아닐 때만 존재하여 재생 유지 */}
-      {view !== 'home' && (
-        <div className={`persistent-audio-player ${view === 'about' && !isSloganHovered ? 'is-about-view' : 'is-hidden-view'}`}>
-          <iframe 
-            width="100%" height="120" 
-            src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" 
-            frameBorder="0" allow="encrypted-media; speaker-selection; web-share;"
-          ></iframe>
         </div>
       )}
     </div>
