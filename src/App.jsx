@@ -159,7 +159,8 @@ function App() {
                 오늘 마주한 것들을 떠올릴 수 있을까.<br/>
                 브랜드는 어떤 시선을 제안할 수 있을까.
               </div>
-              <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
+              <div 
+                className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`}
                 onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
                 onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
               >
@@ -201,8 +202,7 @@ function App() {
           <footer className="footer-layout">
             <div className="footer-container">
               <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
-                <span className="touch-text">TOUCH</span>
-                <span className="comma-text">,</span>
+                <span className="touch-text">TOUCH</span><span className="comma-text">,</span>
                 <div className="input-field-wrapper">
                   <input ref={inputRef} value={inputText} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} onChange={e => handleHomeInteraction(e.target.value)} autoComplete="off" spellCheck="false" />
                   <span className="input-measure">{inputText}</span>
