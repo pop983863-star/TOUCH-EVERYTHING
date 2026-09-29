@@ -37,45 +37,49 @@ body {
 }
 .logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
 
-/* --- [복구] 1:43 버전 FOOTER & DYNAMIC INPUT (터치 전용 로직) --- */
-.footer-layout { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; }
+/* --- [수정] 중앙 정렬 칼각 보정 --- */
+.footer-layout { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; align-items: flex-start; }
 .footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
 .dynamic-input-area {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 5px 0; min-width: 0; max-width: 90vw; cursor: text;
-  /* 평소엔 선이 없다가 활성화 시에만 선이 생김 */
   transition: all 0.5s ease;
+  position: relative;
 }
 
-.dynamic-input-area.is-active {
-  border-bottom: 0.5px solid #111;
+/* 활성화 시 밑줄 생김 */
+.dynamic-input-area.is-active { border-bottom: 0.5px solid #111; }
+
+.touch-text { 
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; 
+  letter-spacing: 0.25em; color: #111; flex-shrink: 0;
+  /* [핵심] 마지막 자간 여백을 상쇄하여 완벽한 중앙 정렬 실현 */
+  margin-right: -0.25em; 
 }
 
-.touch-text, .comma-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; letter-spacing: 0.25em; color: #111; flex-shrink: 0; }
-
-/* 쉼표 애니메이션: 활성화 시에만 가로를 가짐 */
+/* 활성화 시에만 공간을 차지하여 평소 정렬에 영향 주지 않음 */
 .comma-text {
-  width: 0; opacity: 0; transition: all 0.4s ease; display: inline-block; overflow: hidden;
+  width: 0; opacity: 0; transition: all 0.3s ease; 
+  display: inline-block; overflow: hidden;
+  font-size: 9px; letter-spacing: 0.25em; color: #111;
 }
 .dynamic-input-area.is-active .comma-text {
   width: 7px; opacity: 1; margin-right: 2px;
+  /* 쉼표가 생길 때는 TOUCH 텍스트의 마진 상쇄 해제 */
+  margin-left: 0.25em;
 }
 
-.input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 2px; flex-grow: 1; }
+.input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 1px; flex-grow: 1; }
 
+/* 9px 직접 지정 유지 (잘림 방지) */
 input {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 9px; /* 직접 사이즈 지정으로 롤백하여 잘림 방지 */
-  font-weight: 400; background: transparent; border: none; outline: none;
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 400; 
+  background: transparent; border: none; outline: none;
   color: #111; text-transform: uppercase; letter-spacing: 0.2em;
   width: 100%; padding: 0; margin: 0; caret-color: #111;
 }
-/* 측정기: 입력 너비를 실시간 반영하여 선의 길이를 결정 */
-.input-measure { 
-  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; 
-  letter-spacing: 0.2em; text-transform: uppercase; min-width: 1px; padding-right: 5px; 
-}
+.input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; text-transform: uppercase; min-width: 1px; padding-right: 5px; }
 
 .footer-hint { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 2s forwards; }
 @keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
@@ -87,29 +91,27 @@ input {
 .top-nav button.active { color: #000; }
 .sub-content-scroll { width: 100%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 140px 20px 120px 20px; scrollbar-width: none; }
 .sub-content-scroll::-webkit-scrollbar { display: none; }
+.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; align-items: center; }
+.video-box { width: var(--grid-w); height: var(--grid-h); position: relative; flex-shrink: 0; background-color: #f0f0f0; }
+.brand-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* ABOUT & AUDIO IN-PAGE */
+/* ABOUT EDITORIAL */
 .about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 40px; width: 100%; }
 .about-date { font-size: 11px; letter-spacing: 0.1em; color: #999; margin-bottom: 30px; }
 .about-question { font-size: 24px; font-weight: 700; margin-bottom: 40px; color: #111; }
 .about-body { font-size: 14px; line-height: 2.2; color: #444; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 60px; }
+.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 80px; }
 
-/* [해결] 음악 위젯을 About 페이지 슬로건 아래 본문 흐름에 고정 */
-.about-audio-widget-inpage {
-  width: var(--grid-w);
-  margin-top: 20px;
-  margin-bottom: 100px;
-}
+/* 음악 위젯 본문 하단 고정 */
+.about-audio-widget-inpage { width: var(--grid-w); margin-top: 20px; margin-bottom: 100px; }
 
-.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 40px; }
 .slogan-focus-mode .page-sub { background-color: #000 !important; }
 .slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.05); }
 .slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
-
 .home-back-btn { position: fixed !important; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 500; transition: transform 0.3s ease; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* 덴시티 제어 박스 (해결 버전 유지) */
+/* 덴시티 제어 박스 (해결 버전 고정) */
 .halftone-controls-outer { position: fixed; bottom: 100px; width: 100%; display: flex; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
 .halftone-controls-outer:hover { opacity: 1; }
 .halftone-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 4px 20px rgba(0,0,0,0.05); pointer-events: auto; min-width: 110px; }
@@ -127,5 +129,6 @@ input {
   .top-nav { gap: 15px; top: 30px; width: 95%; }
   .top-nav button { font-size: 9px; letter-spacing: 0.15em; }
   .sub-content-scroll { padding: 110px 15px 120px 15px; }
-  .about-audio-widget-inpage { width: calc(var(--grid-w) * 0.68); margin: 0 auto 40px auto; }
+  .video-box { width: calc(var(--grid-w) * 0.68); height: calc(var(--grid-h) * 0.68); margin: 0 auto; }
+  .footer-layout { height: 100px; position: absolute; bottom: 40px; }
 }
