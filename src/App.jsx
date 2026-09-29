@@ -57,7 +57,7 @@ function App() {
         setCurrentBgImage(nextImgUrl);
       }
     } catch (e) {
-      setCurrentBgImage(`https://picsum.photos/seed/${Math.random()}/1200/800`);
+      setCurrentBgImage(`https://picsum.photos/seed/nature/1200/800`);
     }
   };
 
@@ -166,7 +166,6 @@ function App() {
                 지나친 모든 것에 다시 관심을 기울일 때,<br/>
                 평범한 일상은 새로운 발견이 된다.
               </div>
-              {/* 음악 위젯: About 페이지 본문 흐름 맨 하단 배치 */}
               <div className="about-audio-widget-inpage">
                 <iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F&utm_medium=share&utm_source=embed&utm_content=show&utm_term=VXNlcjo1MzUzMTE0NA%3D%3D" frameBorder="0" allow="encrypted-media; fullscreen; speaker-selection; web-share;"></iframe>
               </div>
@@ -201,7 +200,6 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [복구] 1:43 버전의 클래스 기반 동적 입력 영역 */}
               <div className={`dynamic-input-area ${isFocused || inputText ? 'is-active' : ''}`} onClick={() => inputRef.current?.focus()}>
                 <span className="touch-text">TOUCH</span>
                 <span className="comma-text">,</span>
