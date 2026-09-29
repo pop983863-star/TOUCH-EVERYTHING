@@ -15,7 +15,7 @@ body {
 
 .app-root-container { width: 100vw; height: 100vh; position: relative; }
 
-/* --- GRID & VIEWPORT --- */
+/* --- [복구] GRID & VIEWPORT 중앙 고정 --- */
 .page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
 .viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
 .main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
@@ -37,9 +37,10 @@ body {
 }
 .logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
 
-/* --- [복구] 초기화면 텍스트 가변 언더바 & 잘림 해결 --- */
+/* --- [복구] FOOTER & DYNAMIC INPUT (가변 언더바 & 9px 고정) --- */
 .footer-layout { height: 120px; display: flex; justify-content: center; align-items: flex-start; width: 100%; }
 .footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; width: auto; }
+
 .dynamic-input-area {
   display: inline-flex; align-items: center; justify-content: center;
   border-bottom: 0.5px solid #111; padding: 5px 0; min-width: 0; max-width: 90vw; cursor: text;
@@ -51,10 +52,10 @@ body {
 .input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 2px; flex-grow: 1; }
 input {
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 9px; /* 직접 사이즈 지정으로 롤백하여 잘림 해결 */
+  font-size: 9px; /* 스케일 방식 제거하고 직접 크기 부여 */
   font-weight: 400; background: transparent; border: none; outline: none;
   color: #111; text-transform: uppercase; letter-spacing: 0.2em;
-  width: 100%; padding: 0; margin: 0; caret-color: #111;
+  width: 100%; padding: 0; margin: 0; caret-color: #111; z-index: 2;
 }
 .input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; text-transform: uppercase; min-width: 1px; padding-right: 5px; }
 
@@ -68,31 +69,33 @@ input {
 .top-nav button.active { color: #000; }
 .sub-content-scroll { width: 100%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 140px 20px 120px 20px; scrollbar-width: none; }
 .sub-content-scroll::-webkit-scrollbar { display: none; }
+.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; align-items: center; }
+.video-box { width: var(--grid-w); height: var(--grid-h); position: relative; flex-shrink: 0; background-color: #f0f0f0; }
+.brand-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* ABOUT EDITORIAL & AUDIO IN-PAGE */
+/* [해결] ABOUT EDITORIAL & AUDIO IN-PAGE */
 .about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 40px; width: 100%; }
 .about-date { font-size: 11px; letter-spacing: 0.1em; color: #999; margin-bottom: 30px; }
 .about-question { font-size: 24px; font-weight: 700; margin-bottom: 40px; color: #111; }
 .about-body { font-size: 14px; line-height: 2.2; color: #444; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 60px; }
 
-.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 80px; }
-
-/* [수정] 음악 위젯: About 페이지 본문 흐름 하단에 안착 */
-.about-audio-container {
+/* 위젯을 본문 흐름 맨 하단에 안착 */
+.about-audio-widget-inpage {
   width: var(--grid-w);
   margin-top: 20px;
   margin-bottom: 100px;
 }
 
+.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 80px; }
 .slogan-focus-mode .page-sub { background-color: #000 !important; }
 .slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.05); }
-.slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .about-audio-container, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
+.slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
 
 .home-back-btn { position: fixed !important; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 500; transition: transform 0.3s ease; }
 .home-back-btn:hover { transform: scale(1.1); }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* EVERYTING DENSITY BOX (해결 버전 유지) */
+/* [해결] 덴시티 제어 박스: 절반 사이즈 + 호버 시 중앙 노출 유지 */
 .page-everything { background: #fff; cursor: crosshair; position: relative; width: 100vw; height: 100vh; overflow: hidden; }
 canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease; }
 .zooming canvas { transform: scale(12); filter: blur(30px); opacity: 0; }
@@ -113,8 +116,8 @@ canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s c
   .top-nav { gap: 15px; top: 30px; width: 95%; }
   .top-nav button { font-size: 9px; letter-spacing: 0.15em; }
   .sub-content-scroll { padding: 110px 15px 120px 15px; }
-  .video-box, .about-audio-container { width: calc(var(--grid-w) * 0.68); margin: 0 auto; }
-  .video-box { height: calc(var(--grid-h) * 0.68); }
+  .video-box { width: calc(var(--grid-w) * 0.68); height: calc(var(--grid-h) * 0.68); margin: 0 auto; }
+  .about-audio-widget-inpage { width: calc(var(--grid-w) * 0.68); margin: 0 auto 40px auto; }
   .about-question { font-size: 18px; line-height: 1.4; padding: 0 10px; }
   .about-body { font-size: 12px; line-height: 2.2; padding: 0 10px; text-align: justify; }
   .about-slogan-text { margin-top: 60px; padding: 30px 20px; font-size: 13px; width: 85vw; }
