@@ -1,144 +1,154 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap');
 
-/* --- 기본 설정 유지 --- */
-:root { --node-size: 96px; --grid-w: 496px; --grid-h: 396px; }
-body { margin: 0; background: #fff; font-family: 'IBM Plex Sans', sans-serif; overflow: hidden; }
-
-/* --- INTERNAL SPLIT LAYOUT --- */
-.internal-container {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  background: #fff;
+:root {
+  --node-size: 96px;
+  --grid-w: 496px;
+  --grid-h: 396px;
 }
 
-/* 좌측 사이드바 메뉴 (이미지 스타일 반영) */
-.side-nav {
-  width: 30vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 5vw;
-  background: #fff;
-  position: fixed;
-  left: 0; top: 0;
-  z-index: 100;
-}
-
-.nav-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.nav-main-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #000;
-  cursor: pointer;
-  letter-spacing: -0.02em;
-}
-
-.nav-comma {
-  font-size: 18px;
-  color: #e0e0e0;
-  margin-top: -10px;
-  margin-bottom: 10px;
-}
-
-.side-nav button {
-  background: none;
-  border: none;
+body {
+  margin: 0; background-color: #ffffff;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: #dcdcdc; /* 비활성 상태: 연한 회색 */
-  text-align: left;
-  padding: 4px 0;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  letter-spacing: -0.01em;
+  font-weight: 400; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.side-nav button.active, .side-nav button:hover {
-  color: #000; /* 활성 상태: 검은색 */
+.app-root-container { width: 100vw; height: 100vh; position: relative; }
+
+/* --- GRID & VIEWPORT --- */
+.page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
+.viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; padding-bottom: 10vh; }
+.main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
+.layer-static, .layer-dynamic { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
+.on { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
+.pixel-perfect { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+.mask-circle {
+  position: absolute; width: var(--node-size); height: var(--node-size);
+  border-radius: 50%; background-repeat: no-repeat;
+  background-size: var(--grid-w) var(--grid-h);
+  background-color: #f9f9f9; transition: background-image 1.5s ease-in-out;
 }
 
-/* 우측 스크롤 영역 */
-.main-content-scroll {
-  width: 70vw;
-  height: 100vh;
-  margin-left: 30vw;
-  overflow-y: scroll;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
+.logo-overlay-marker {
+  position: absolute; width: var(--node-size); height: var(--node-size);
+  z-index: 20; transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex; align-items: center; justify-content: center;
 }
-.main-content-scroll::-webkit-scrollbar { display: none; }
-
-.internal-section {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 100px 0;
-}
-
-/* 섹션별 배경 보정 */
-.editorial-bg { background: #fff; }
-
-/* --- 기존 요소 스타일 통합 --- */
-.page-home { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; }
-.viewport { flex: 1; display: flex; align-items: center; justify-content: center; padding-bottom: 10vh; }
-.main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); }
-.pixel-perfect { width: 100%; height: 100%; object-fit: fill; }
-.mask-circle { position: absolute; width: var(--node-size); height: var(--node-size); border-radius: 50%; background-repeat: no-repeat; background-size: var(--grid-w) var(--grid-h); background-color: #f9f9f9; transition: background-image 1.5s ease-in-out; }
-.logo-overlay-marker { position: absolute; width: var(--node-size); height: var(--node-size); z-index: 20; transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; justify-content: center; }
 .logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
 
-.footer-layout { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; }
-.dynamic-input-area { display: inline-flex; align-items: center; justify-content: center; padding: 5px 0; }
+/* --- [복구] FOOTER & DYNAMIC INPUT (정중앙 보정 & 잘림 해결) --- */
+.footer-layout { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; align-items: flex-start; }
+.footer-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+.dynamic-input-area {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 5px 0; min-width: 0; max-width: 90vw; cursor: text;
+  position: relative;
+  transition: all 0.5s ease;
+}
+
 .dynamic-input-area.is-active { border-bottom: 0.5px solid #111; }
-.touch-text, .comma-text { font-size: 9px; letter-spacing: 0.25em; color: #111; }
-input { font-size: 9px; font-weight: 400; background: transparent; border: none; outline: none; text-transform: uppercase; letter-spacing: 0.2em; caret-color: #111; }
-.input-measure { font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; padding-right: 5px; }
+
+.touch-text {
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px;
+  letter-spacing: 0.25em; color: #111; flex-shrink: 0;
+  /* [핵심] 마지막 자간 여백을 상쇄하여 정적 상태에서 글자 자체를 정중앙에 위치시킴 */
+  margin-right: -0.25em; 
+}
+
+.comma-text {
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #111;
+  width: 0; opacity: 0; transition: all 0.3s ease; display: inline-block; overflow: hidden;
+}
+
+.dynamic-input-area.is-active .comma-text {
+  width: 7px; opacity: 1; margin-right: 2px;
+  margin-left: 0.25em; /* 상쇄했던 마진 복원 */
+}
+
+.input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 1px; flex-grow: 1; }
+
+input {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 9px; /* 직접 사이즈 지정 유지 (잘림 방지) */
+  font-weight: 400; background: transparent; border: none; outline: none;
+  color: #111; text-transform: uppercase; letter-spacing: 0.2em;
+  width: 100%; padding: 0; margin: 0; caret-color: #111;
+}
+
+.input-measure { 
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; 
+  visibility: hidden; white-space: pre; 
+  letter-spacing: 0.2em; text-transform: uppercase; 
+  min-width: 1px; padding-right: 5px; 
+}
+
+.footer-hint { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0; animation: hintAppear 1.5s ease 2s forwards; }
+@keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- SUBPAGE LAYOUT --- */
+.page-sub { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; z-index: 100; animation: fadeIn 1s ease; }
+.top-nav { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; z-index: 200; }
+.top-nav button { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; background: none; border: none; font-size: 11px; letter-spacing: 0.25em; cursor: pointer; color: #d1d1d1; transition: color 0.4s ease; }
+.top-nav button.active { color: #000; }
+.sub-content-scroll { width: 100%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 140px 20px 120px 20px; scrollbar-width: none; }
+.sub-content-scroll::-webkit-scrollbar { display: none; }
+.sub-video-container { display: flex; flex-direction: column; gap: 100px; margin: 20px 0; align-items: center; }
+.video-box { width: var(--grid-w); height: var(--grid-h); position: relative; flex-shrink: 0; background-color: #f0f0f0; }
+.brand-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ABOUT EDITORIAL */
-.about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 500px; }
-.about-date { font-size: 11px; color: #999; margin-bottom: 30px; }
-.about-question { font-size: 22px; font-weight: 700; margin-bottom: 40px; line-height: 1.4; }
-.about-body { font-size: 14px; line-height: 2.2; color: #444; }
-.about-slogan-text { margin-top: 100px; padding: 40px; font-size: 16px; font-weight: 700; transition: all 0.8s ease; margin-bottom: 100px; }
+.about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 40px; width: 100%; }
+.about-date { font-size: 11px; letter-spacing: 0.1em; color: #999; margin-bottom: 30px; }
+.about-question { font-size: 24px; font-weight: 700; margin-bottom: 40px; color: #111; }
+.about-body { font-size: 14px; line-height: 2.2; color: #444; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 60px; }
+.about-audio-widget-inpage { width: var(--grid-w); margin-top: 20px; margin-bottom: 100px; }
+.about-slogan-text { margin-top: 60px; background: transparent; color: #111; padding: 40px 60px; font-size: 16px; font-weight: 700; line-height: 1.8; letter-spacing: -0.01em; width: fit-content; transition: all 0.8s ease; text-align: center; margin-bottom: 80px; }
 
-/* FOCUS MODE (ABOUT 전용) */
-.slogan-focus-mode .internal-section.editorial-bg { background-color: #000 !important; }
+.slogan-focus-mode .page-sub { background-color: #000 !important; }
 .slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.05); }
-.slogan-focus-mode .side-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
-
-/* HALFTONE CANVAS BOX */
-.page-everything { width: 100%; height: 80vh; position: relative; overflow: hidden; background: #fff; }
-.halftone-box { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 4px 20px rgba(0,0,0,0.05); min-width: 110px; }
-.halftone-controls-outer { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; opacity: 0; transition: opacity 0.4s; }
-.page-everything:hover .halftone-controls-outer { opacity: 1; }
-
-/* VIDEO SECTION */
-.sub-video-container { display: flex; flex-direction: column; gap: 60px; align-items: center; }
-.video-box { width: var(--grid-w); height: var(--grid-h); background: #f0f0f0; }
-.brand-video { width: 100%; height: 100%; object-fit: cover; }
-
-.home-back-btn { position: fixed; right: 40px; bottom: 40px; width: 50px; height: 50px; z-index: 500; cursor: pointer; }
+.slogan-focus-mode .top-nav, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question, .slogan-focus-mode .about-body, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .home-back-btn { opacity: 0 !important; pointer-events: none; }
+.home-back-btn { position: fixed !important; right: 40px; bottom: 40px; width: 50px; height: 50px; cursor: pointer; z-index: 500; transition: transform 0.3s ease; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* 📱 MOBILE */
-@media (max-width: 800px) {
-  .side-nav { width: 100%; height: 60px; top: 0; padding-left: 0; justify-content: center; flex-direction: row; }
-  .nav-group { flex-direction: row; align-items: center; gap: 15px; }
-  .nav-comma { display: none; }
-  .side-nav button, .nav-main-title { font-size: 12px; }
-  .main-content-scroll { width: 100%; margin-left: 0; padding-top: 60px; }
-  .video-box { width: 90vw; height: auto; aspect-ratio: 496/396; }
+/* [수정] 덴시티 제어 박스: 절반 크기 + 내부 완전 중앙 정렬 */
+.page-everything { background: #fff; cursor: crosshair; position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1), filter 1s ease; }
+.zooming canvas { transform: scale(12); filter: blur(30px); opacity: 0; }
+
+.halftone-controls-outer { 
+  position: fixed; bottom: 100px; width: 100%; 
+  display: flex; justify-content: center; z-index: 100; 
+  opacity: 0; transition: opacity 0.4s ease; pointer-events: none; 
+}
+.halftone-controls-outer:hover { opacity: 1; }
+
+.halftone-box { 
+  display: flex; flex-direction: column; align-items: center; justify-content: center; /* 내부 정중앙 정렬 */
+  gap: 6px; padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.96); 
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); pointer-events: auto; min-width: 110px;
+  text-align: center;
+}
+.halftone-box span { font-size: 7px; font-weight: 700; color: #333; letter-spacing: 0.15em; }
+.halftone-box input[type="range"] { 
+  width: 80px; -webkit-appearance: none; height: 1px; background: #ddd; outline: none; 
+  margin: 0 auto; /* 수평 정가운데 */
+  display: block;
+}
+.halftone-box input[type="range"]::-webkit-slider-thumb { 
+  -webkit-appearance: none; width: 8px; height: 8px; background: #000; border-radius: 50%; cursor: pointer; 
+}
+.everything-zoom-hint { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); font-family: 'IBM Plex Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; z-index: 500; background: rgba(255,255,255,0.85); padding: 10px 25px; border-radius: 30px; color: #111; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- 📱 MOBILE RESPONSIVE --- */
+@media (max-width: 600px) {
+  .main-grid-wrapper { transform: scale(0.68); transform-origin: center center; margin: 0 auto; left: 0; right: 0; }
+  .logo-overlay-marker img { aspect-ratio: 1/1; width: 100%; height: 100%; }
+  .top-nav { gap: 15px; top: 30px; width: 95%; }
+  .top-nav button { font-size: 9px; letter-spacing: 0.15em; }
+  .sub-content-scroll { padding: 110px 15px 120px 15px; }
+  .video-box { width: calc(var(--grid-w) * 0.68); height: calc(var(--grid-h) * 0.68); margin: 0 auto; }
 }
