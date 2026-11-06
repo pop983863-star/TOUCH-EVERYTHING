@@ -28,7 +28,7 @@ const generateGridNodes = () => {
 
 function App() {
   const [view, setView] = useState('home'); 
-  const [activeSection, setActiveSection] = useState('empty'); 
+  const [activeSection, setActiveSection] = useState('overview'); 
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [nodes] = useState(generateGridNodes());
@@ -39,11 +39,11 @@ function App() {
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null); 
   const [isSloganHovered, setIsSloganHovered] = useState(false);
-  const [isShuffling, setIsShuffling] = useState(false);
 
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
+  const subPageActivityTime = useRef(Date.now()); 
   const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
   const inputTimeout = useRef(null);
@@ -79,15 +79,21 @@ function App() {
     }
   };
 
+  const handleHomeInteraction = (val) => {
+    setInputText(val);
+    lastInteractionTime.current = Date.now();
+    if (mode === 'static' && val.trim() !== '') setMode('interactive');
+    if (inputTimeout.current) clearTimeout(inputTimeout.current);
+    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
+  };
+
   const moveLogos = useCallback(() => {
-    setIsShuffling(true);
     setActiveIndices(() => {
       let first = Math.floor(Math.random() * TOTAL_NODES);
       let second = Math.floor(Math.random() * TOTAL_NODES);
       while (second === first) second = Math.floor(Math.random() * TOTAL_NODES);
       return [first, second];
     });
-    setTimeout(() => setIsShuffling(false), 800);
   }, []);
 
   useEffect(() => {
@@ -96,14 +102,6 @@ function App() {
     }, 10000);
     return () => clearInterval(shuffleInterval);
   }, [view, moveLogos]);
-
-  const handleHomeInteraction = (val) => {
-    setInputText(val);
-    lastInteractionTime.current = Date.now();
-    if (mode === 'static' && val.trim() !== '') setMode('interactive');
-    if (inputTimeout.current) clearTimeout(inputTimeout.current);
-    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
-  };
 
   const drawHalftone = useCallback(async () => {
     if (view !== 'internal' || !canvasRef.current || !currentBgImage) return;
@@ -156,8 +154,8 @@ function App() {
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
         if (mode === 'interactive' && diff >= 12) { setMode('static'); setInputText(''); }
-        else if (mode === 'static' && diff >= 10 && diff < 40) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage('minimal'); } }
-        else if (mode === 'slideshow' && diff >= 40) { setMode('static'); lastInteractionTime.current = Date.now(); }
+        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage('minimal'); } }
+        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); lastInteractionTime.current = Date.now(); }
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -180,7 +178,7 @@ function App() {
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
                 ))}
                 {activeIndices.map((idx, i) => (
-                  <div key={i} className={`logo-overlay-marker ${isShuffling ? 'shuffling' : ''}`} style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}>
+                  <div key={i} className="logo-overlay-marker" style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}>
                     <img src="/assets/logo-reference.png" alt="Logo" />
                   </div>
                 ))}
@@ -196,8 +194,7 @@ function App() {
                   <span className="input-measure">{inputText}</span>
                 </div>
               </div>
-              {/* [수정] 힌트 문구를 인풋 바로 아래로 고정 */}
-              {(mode !== 'static' || inputText) && <div className="footer-hint-below">TOUCH SYMBOL</div>}
+              {(mode !== 'static' || inputText) && <div className="footer-hint-centered">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -219,7 +216,8 @@ function App() {
           </aside>
 
           <main className="internal-main" ref={scrollContainerRef}>
-            <section className="internal-section section-overview" ref={overviewRef}>
+            {/* 쉼표(,) 섹션: 1.5배 커진 영상과 슬로건 */}
+            <section className="internal-section" ref={overviewRef}>
               <div className="internal-home-video-row scaled-row">
                 <div className="video-box-large"><video autoPlay loop muted playsInline className="brand-video"><source src="/assets/logo-system.mp4" type="video/mp4" /></video></div>
                 <div className="video-box-large"><video autoPlay loop muted playsInline className="brand-video"><source src="/assets/logo-loop.mp4" type="video/mp4" /></video></div>
@@ -241,12 +239,7 @@ function App() {
                     setSelectedColor(hex.toUpperCase()); setIsZooming(true);
                     fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
                   }} />
-                  <div className="halftone-controls-outer">
-                    <div className="halftone-box">
-                      <span>DENSITY</span>
-                      <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
-                    </div>
-                  </div>
+                  <div className="halftone-controls-outer"><div className="halftone-box"><span>DENSITY</span><input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} /></div></div>
                 </div>
                 <div className="everything-zoom-hint-inline">{selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span>CLICK ANYWHERE TO EXPLORE COLOR</span>}</div>
               </div>
