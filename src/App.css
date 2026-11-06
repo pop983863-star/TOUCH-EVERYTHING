@@ -4,147 +4,43 @@
   --node-size: 96px;
   --grid-w: 496px;
   --grid-h: 396px;
-  --sidebar-w: 22%;
-  --content-w: 78%;
 }
 
 body {
   margin: 0; background-color: #ffffff;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400; overflow-x: hidden;
+  font-weight: 400; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
 .app-root-container { width: 100vw; height: 100vh; position: relative; }
 
-/* --- [수정] 인트로 로고 정비례 및 그리드 동기화 --- */
-.main-grid-wrapper {
-  position: relative;
-  width: var(--grid-w);
-  height: var(--grid-h);
-  /* 로고 사이즈에 맞춰 그리드를 0.95배로 미세 축소 및 정중앙 배치 */
-  transform: scale(0.95);
-  transform-origin: center center;
-}
-
-.logo-overlay-marker {
-  position: absolute; 
-  width: var(--node-size); 
-  height: var(--node-size);
-  aspect-ratio: 1 / 1; /* 가로 찌그러짐 방지 */
-  z-index: 20; 
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex; align-items: center; justify-content: center;
-}
-
-.logo-overlay-marker img { 
-  width: 100%; 
-  height: 100%; 
-  border-radius: 50%; 
-  object-fit: cover; /* 찌그러짐 방지 2차 */
-  transform: scale(1.02); 
-}
-
-/* --- [수정] 인트로 힌트 문구: 인풋 위로 배치 --- */
-.footer-hint-above {
-  margin-bottom: 12px;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 9px;
-  color: #d1d1d1;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  animation: hintAppear 1.5s ease forwards;
-  text-align: center;
-}
-
-/* --- [수정] 내부 페이지 스크롤 여백 및 앵커 정렬 --- */
-.internal-section {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 150px 0; /* 위아래 여백 확대 */
-  box-sizing: border-box;
-  /* 인덱스 클릭 시 시작점이 네비바 아래에 딱 맞게 */
-  scroll-margin-top: 80px; 
-}
-
-/* --- [수정] EVERYTHING 페이지 힌트 텍스트 8pt --- */
-.everything-zoom-hint-inline {
-  margin-top: 20px;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 10.6px; /* 약 8pt */
-  letter-spacing: 0.25em;
-  color: #bbb;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-/* --- [수정] 덴시티 제어 박스: 내부 정렬 및 완전 정중앙 --- */
-.halftone-controls-outer {
-  position: absolute;
-  bottom: 30px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  z-index: 100;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-}
-.page-everything:hover .halftone-controls-outer { opacity: 1; }
-
-.halftone-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px; /* 텍스트와 슬라이더 간격 */
-  padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-  border-radius: 6px;
-  pointer-events: auto;
-  min-width: 120px;
-}
-
-.halftone-box span {
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: #333;
-}
-
-/* 슬라이더 바 트랙 및 손잡이 시각화 */
-.halftone-box input[type="range"] {
-  width: 90px;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 2px;
-  background: #eee;
-  outline: none;
-  margin: 5px 0;
-}
-
-.halftone-box input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 10px;
-  height: 10px;
-  background: #000;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 1.5px solid #fff;
-}
-
-/* --- 기존 레이아웃 및 정렬 유지 --- */
+/* --- [복구] 홈 화면: 정중앙 고정 레이아웃 --- */
 .page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
 .viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding-bottom: 10vh; }
+.main-grid-wrapper { 
+  position: relative; width: var(--grid-w); height: var(--grid-h); 
+  transform: scale(0.95); transform-origin: center center;
+}
+.layer-static, .layer-dynamic { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
 .on { opacity: 1 !important; pointer-events: auto !important; z-index: 10; }
 .pixel-perfect { width: 100%; height: 100%; object-fit: fill; display: block; }
 .mask-circle { position: absolute; width: var(--node-size); height: var(--node-size); border-radius: 50%; background-repeat: no-repeat; background-size: var(--grid-w) var(--grid-h); background-color: #f9f9f9; transition: background-image 1.5s ease-in-out; }
+
+/* 로고 이미지 찌그러짐 방지 고정 */
+.logo-overlay-marker {
+  position: absolute; width: var(--node-size); height: var(--node-size);
+  aspect-ratio: 1/1; z-index: 20; 
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-overlay-marker img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; transform: scale(1.02); }
+
+/* 인트로 힌트: 인풋 위 배치 */
+.footer-hint-above {
+  margin-bottom: 15px; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; color: #d1d1d1;
+  letter-spacing: 0.25em; text-transform: uppercase; text-align: center;
+}
 
 .footer-layout { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; align-items: flex-start; }
 .footer-container { display: flex; flex-direction: column; align-items: center; }
@@ -156,60 +52,81 @@ body {
 input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 400; background: transparent; border: none; outline: none; color: #111; text-transform: uppercase; letter-spacing: 0.2em; caret-color: #111; width: 100%; padding: 0; margin: 0; line-height: 1; }
 .input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; padding-right: 5px; }
 
-.internal-layout { display: flex; width: 100vw; height: 100vh; background: #fff; }
-.internal-sidebar { width: var(--sidebar-w); height: 100vh; display: flex; align-items: center; padding-left: 5vw; position: fixed; left: 0; top: 0; z-index: 100; background: #fff; }
-.sidebar-group { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.sidebar-title { font-size: 16px; font-weight: 700; cursor: pointer; color: #eee; transition: color 0.3s; }
-.sidebar-title.active { color: #000; }
-.sidebar-comma { font-size: 18px; color: #eee; margin-top: -8px; margin-bottom: 8px; cursor: pointer; transition: color 0.4s; }
-.sidebar-comma.active { color: #000; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
-.sidebar-nav button { background: none; border: none; padding: 0; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 16px; color: #eee; cursor: pointer; transition: color 0.3s; }
-.sidebar-nav button.active, .sidebar-nav button:hover { color: #000; }
-.internal-main { width: var(--content-w); height: 100vh; margin-left: var(--sidebar-w); overflow-y: scroll; scroll-behavior: smooth; scrollbar-width: none; }
-.internal-main::-webkit-scrollbar { display: none; }
+/* --- [복구] 내부 페이지: 상단 중앙 인덱스 방식 --- */
+.internal-full-scroll {
+  width: 100vw; height: 100vh; background: #fff;
+  overflow-y: scroll; scroll-behavior: smooth;
+}
+.internal-full-scroll::-webkit-scrollbar { display: none; }
 
+.internal-top-nav {
+  position: fixed; top: 0; left: 0; width: 100%; height: 80px;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex; justify-content: center; align-items: center;
+  gap: 40px; z-index: 1000;
+}
+.internal-top-nav button {
+  background: none; border: none; font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700; font-size: 13px; color: #d1d1d1;
+  cursor: pointer; transition: color 0.3s; letter-spacing: 0.15em;
+}
+.internal-top-nav button:hover { color: #000; }
+
+/* 섹션 스타일: 위아래 여백 250px 확장 및 앵커 포인트 고정 */
+.internal-section {
+  width: 100%; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 250px 0; box-sizing: border-box;
+  scroll-margin-top: 80px; /* 클릭 시 상단 네비바에 딱 맞춰 정렬 */
+}
+
+/* 쉼표 섹션 영상 여백 */
 .internal-home-video-row { display: flex; flex-direction: row; justify-content: center; gap: 80px; width: 100%; margin-bottom: 120px; }
 .video-box-large { width: calc(var(--grid-w) * 1.5); height: calc(var(--grid-h) * 1.5); flex-shrink: 0; background-color: #f8f8f8; }
 .brand-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .main-slogan { font-size: 24px; font-weight: 700; letter-spacing: 0.1em; color: #000; text-align: center; }
 
-.everything-frame { width: 85%; max-width: 900px; display: flex; flex-direction: column; align-items: center; gap: 10px; position: relative; }
+/* EVERYTHING 프레임 및 8pt 힌트 */
+.everything-frame { width: 85%; max-width: 900px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .page-everything { width: 100%; aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: #fcfcfc; border: 0.5px solid #eee; }
+.everything-zoom-hint-inline-small { 
+  margin-top: 25px; font-family: 'IBM Plex Sans', sans-serif; font-size: 10.6px; /* 8pt */
+  letter-spacing: 0.25em; color: #bbb; text-transform: uppercase; text-align: center; 
+}
 
+/* [수정] 덴시티 제어 박스: 내부 통합 정렬 */
+.halftone-controls-outer { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+.page-everything:hover .halftone-controls-outer { opacity: 1; }
+.halftone-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.98); box-shadow: 0 4px 20px rgba(0,0,0,0.05); pointer-events: auto; min-width: 110px; }
+.halftone-box span { font-size: 7px; font-weight: 700; color: #333; letter-spacing: 0.15em; }
+.halftone-box input[type="range"] { 
+  width: 80px; -webkit-appearance: none; appearance: none;
+  height: 2px; background: #eee; outline: none; margin: 5px auto; display: block;
+}
+.halftone-box input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 8px; height: 8px; background: #000; border-radius: 50%; cursor: pointer; border: 1.5px solid #fff; }
+
+/* ABOUT & EXPERIENCE */
 .about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 800px; }
 .about-body { font-size: 13.5px; line-height: 2.3; color: #444; width: 100%; word-break: keep-all; }
 .about-slogan-text { margin-top: 60px; padding: 30px; font-size: 15px; font-weight: 700; transition: all 0.8s ease; margin-bottom: 80px; }
 .about-audio-widget-inpage { width: var(--grid-w); margin-top: 20px; margin-bottom: 100px; }
-
 .experience-img-frame { width: 85%; max-width: 900px; display: block; }
 .experience-img-frame img { width: 100%; height: auto; object-fit: contain; }
 
-.episode-vertical-list { display: flex; flex-direction: column; gap: 80px; width: 85%; max-width: 900px; margin-bottom: 80px; }
+/* EPISODE */
+.episode-vertical-list { display: flex; flex-direction: column; gap: 100px; width: 85%; max-width: 900px; margin-bottom: 100px; }
 .episode-item-original { position: relative; width: 100%; overflow: hidden; cursor: pointer; }
 .episode-item-original img { width: 100%; height: auto; display: block; }
 .episode-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; }
 .episode-item-original:hover .episode-overlay { opacity: 1; }
 .overlay-text { color: #fff; font-weight: 700; font-size: 11pt; text-align: center; line-height: 1.6; word-break: keep-all; }
-.episode-footer-text { text-align: center; width: 85%; max-width: 900px; }
-.episode-footer-text .footer-small { font-size: 9.5pt; line-height: 1.6; color: #777; margin: 6px 0; white-space: nowrap; }
 
 .home-back-btn { position: fixed !important; right: 30px; bottom: 30px; width: 45px; height: 45px; z-index: 500; cursor: pointer; transition: transform 0.3s ease; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-.slogan-focus-mode .internal-layout, .slogan-focus-mode .internal-section { background-color: #000; }
+.slogan-focus-mode .internal-full-scroll, .slogan-focus-mode .internal-section { background-color: #000; }
 .slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.03); }
-.slogan-focus-mode .internal-sidebar, .slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question { opacity: 0 !important; pointer-events: none; }
+.slogan-focus-mode .internal-top-nav, .slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question { opacity: 0 !important; pointer-events: none; }
 
-@keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .view-fade-in { animation: fadeIn 0.8s ease-in-out forwards; }
-
-/* 📱 MOBILE RESPONSIVE UPDATES */
-@media (max-width: 800px) {
-  .main-grid-wrapper { transform: scale(0.68); transform-origin: center center; margin: 0 auto; left: 0; right: 0; }
-  .logo-overlay-marker img { aspect-ratio: 1/1; width: 100%; height: 100%; }
-  .sub-content-scroll { padding: 110px 15px 120px 15px; }
-  .video-box { width: calc(var(--grid-w) * 0.68); height: calc(var(--grid-h) * 0.68); margin: 0 auto; }
-  .footer-layout { height: 100px; position: absolute; bottom: 40px; }
-}
