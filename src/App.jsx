@@ -149,23 +149,14 @@ function App() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [view]);
 
-  // [수정] 인트로 시퀀스 타이머 (자동 새로고침/복귀 로직 삭제)
   useEffect(() => {
     const timer = setInterval(() => {
-      if (view !== 'home' || isFocused) return;
       const now = Date.now();
-      const diff = (now - lastInteractionTime.current) / 1000;
-
-      // 입력 중 무반응 시 초기화는 유지 (인트로 내에서만)
-      if (mode === 'interactive' && diff >= 12) { 
-        setMode('static'); setInputText(''); 
-      }
-      // 유휴 상태에서 슬라이드쇼 전환 유지
-      else if (mode === 'static' && diff >= 25 && diff < 55) { 
-        if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage('minimal'); } 
-      }
-      else if (mode === 'slideshow' && diff >= 55) { 
-        setMode('static'); lastInteractionTime.current = Date.now(); 
+      if (view === 'home' && !isFocused) {
+        const diff = (now - lastInteractionTime.current) / 1000;
+        if (mode === 'interactive' && diff >= 12) { setMode('static'); setInputText(''); }
+        else if (mode === 'static' && diff >= 10 && diff < 40) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage('minimal'); } }
+        else if (mode === 'slideshow' && diff >= 40) { setMode('static'); lastInteractionTime.current = Date.now(); }
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -181,7 +172,6 @@ function App() {
       {view === 'home' && (
         <div className="page-home">
           <div className="viewport">
-            {/* [수정] 메인 그리드 래퍼 자체에 클릭 이벤트 부여 */}
             <div className="main-grid-wrapper clickable-grid" onClick={() => setView('internal')}>
               <div className={`layer-static ${mode === 'static' ? 'on' : ''}`}><img src="/assets/initial-grid.png" alt="Static" className="pixel-perfect" /></div>
               <div className={`layer-dynamic ${mode !== 'static' ? 'on' : ''}`}>
@@ -268,7 +258,13 @@ function App() {
                   쉽게 지나치는 순간에 주목하고, 감각적 경험을 통해<br/>
                   새로운 라이프스타일을 제안한다.
                 </p>
-                <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`} onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}>지나친 모든 것에 다시 관심을 기울일 때,<br/>평범한 일상은 새로운 발견이 된다.</div>
+                <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`} 
+                  onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
+                  onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
+                >
+                  지나친 모든 것에 다시 관심을 기울일 때,<br/>
+                  평범한 일상은 새로운 발견이 된다.
+                </div>
                 <div className="about-audio-widget-inpage"><iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F" frameBorder="0"></iframe></div>
               </div>
             </section>
@@ -292,7 +288,9 @@ function App() {
               </div>
             </section>
           </main>
-          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); setInputText(''); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
+          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); setInputText(''); }}>
+            <img src="/assets/logo-reference.png" alt="Home" />
+          </div>
         </div>
       )}
     </div>
