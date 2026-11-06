@@ -11,18 +11,13 @@
 body {
   margin: 0; background-color: #ffffff;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400; overflow: hidden;
+  font-weight: 400; overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
 .app-root-container { width: 100vw; height: 100vh; position: relative; }
 
-/* --- [수정] 홈 그리드 영역 전체 클릭 가능하도록 커서 추가 --- */
-.clickable-grid {
-  cursor: pointer;
-}
-
-/* --- HOME VIEW (1:50 VERSION) --- */
+/* --- HOME VIEW --- */
 .page-home { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
 .viewport { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding-bottom: 10vh; }
 .main-grid-wrapper { position: relative; width: var(--grid-w); height: var(--grid-h); transform-origin: center center; }
@@ -42,7 +37,27 @@ body {
 .comma-text { width: 0; opacity: 0; transition: all 0.3s ease; display: inline-block; overflow: hidden; font-size: 9px; color: #111; }
 .dynamic-input-area.is-active .comma-text { width: 7px; opacity: 1; margin-right: 2px; margin-left: 0.25em; }
 .input-field-wrapper { position: relative; display: inline-flex; align-items: center; min-width: 1px; flex-grow: 1; height: 12px; }
-input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 400; background: transparent; border: none; outline: none; color: #111; text-transform: uppercase; letter-spacing: 0.2em; caret-color: #111; width: 100%; padding: 0; margin: 0; line-height: 1; }
+
+/* [중요] 모바일 줌 방지: 폰트는 16px로 잡고 스케일로 줄임 */
+input { 
+  font-family: 'IBM Plex Sans', sans-serif; 
+  font-size: 16px; 
+  font-weight: 400; 
+  background: transparent; 
+  border: none; 
+  outline: none; 
+  color: #111; 
+  text-transform: uppercase; 
+  letter-spacing: 0.2em; 
+  width: 100%; 
+  position: absolute; 
+  top: 0; left: 0; 
+  height: 100%; 
+  padding: 0; margin: 0; 
+  caret-color: #111;
+  transform: scale(0.5625); /* 16px * 0.5625 = 9px */
+  transform-origin: left center;
+}
 .input-measure { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; visibility: hidden; white-space: pre; letter-spacing: 0.2em; padding-right: 5px; }
 
 /* --- INTERNAL --- */
@@ -51,14 +66,20 @@ input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 4
 .sidebar-group { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .sidebar-title { font-size: 16px; font-weight: 700; cursor: pointer; color: #eee; transition: color 0.3s; }
 .sidebar-title:hover { color: #000; }
-.sidebar-comma { font-size: 18px; color: #eee; margin-top: -8px; margin-bottom: 8px; cursor: pointer; transition: color 0.4s; }
+.sidebar-comma { font-size: 18px; color: #eee; margin-top: -8px; margin-bottom: 8px; cursor: pointer; }
 .sidebar-comma.active { color: #000; }
 .sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
 .sidebar-nav button { background: none; border: none; padding: 0; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 16px; color: #eee; cursor: pointer; transition: color 0.3s; }
 .sidebar-nav button.active, .sidebar-nav button:hover { color: #000; }
-.internal-main { width: var(--content-w); height: 100vh; margin-left: var(--sidebar-w); overflow-y: scroll; scroll-behavior: smooth; scrollbar-width: none; }
+
+.internal-main { 
+  width: var(--content-w); height: 100vh; margin-left: var(--sidebar-w); 
+  overflow-y: scroll; scroll-behavior: smooth; 
+  -webkit-overflow-scrolling: touch; /* iOS 스크롤 성능 강화 */
+  scrollbar-width: none; 
+}
 .internal-main::-webkit-scrollbar { display: none; }
-.internal-section { width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; }
+.internal-section { width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; box-sizing: border-box; }
 
 .internal-home-video-row { display: flex; flex-direction: row; justify-content: center; gap: 80px; width: 100%; margin-bottom: 120px; }
 .video-box-large { width: calc(var(--grid-w) * 1.5); height: calc(var(--grid-h) * 1.5); flex-shrink: 0; background-color: #f8f8f8; }
@@ -67,8 +88,6 @@ input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 4
 
 .everything-frame { width: 85%; max-width: 900px; display: flex; flex-direction: column; align-items: center; gap: 10px; position: relative; }
 .page-everything { width: 100%; aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: #fcfcfc; border: 0.5px solid #eee; }
-.everything-frame:hover canvas { filter: blur(6px) grayscale(0.2); }
-.everything-zoom-hint-inline { margin-top: 20px; font-size: 9px; letter-spacing: 0.25em; color: #bbb; text-transform: uppercase; text-align: center; }
 .halftone-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 4px 20px rgba(0,0,0,0.05); pointer-events: auto; min-width: 110px; }
 .halftone-controls-outer { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
 .page-everything:hover .halftone-controls-outer { opacity: 1; }
@@ -76,7 +95,7 @@ input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 4
 .halftone-box input[type="range"] { width: 80px; -webkit-appearance: none; height: 1px; background: #ddd; outline: none; margin: 0 auto; }
 .halftone-box input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 8px; height: 8px; background: #000; border-radius: 50%; cursor: pointer; }
 
-.about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 800px; }
+.about-editorial-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 800px; padding: 0 20px; }
 .about-date { font-size: 11px; color: #999; margin-bottom: 25px; }
 .about-question { font-size: 22px; font-weight: 700; margin-bottom: 35px; }
 .about-body { font-size: 13.5px; line-height: 2.3; color: #444; width: 100%; word-break: keep-all; }
@@ -87,7 +106,7 @@ input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 4
 .experience-img-frame img { width: 100%; height: auto; object-fit: contain; }
 
 .episode-vertical-list { display: flex; flex-direction: column; gap: 80px; width: 85%; max-width: 900px; margin-bottom: 80px; }
-.episode-item-original { position: relative; width: 100%; overflow: hidden; cursor: pointer; }
+.episode-item-original { position: relative; width: 100%; overflow: hidden; }
 .episode-item-original img { width: 100%; height: auto; display: block; }
 .episode-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; }
 .episode-item-original:hover .episode-overlay { opacity: 1; }
@@ -98,12 +117,45 @@ input { font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 4
 .home-back-btn { position: fixed !important; right: 30px; bottom: 30px; width: 45px; height: 45px; z-index: 500; cursor: pointer; transition: transform 0.3s ease; }
 .home-back-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-.slogan-focus-mode .internal-layout, .slogan-focus-mode .internal-section { background-color: #000; }
-.slogan-focus-mode .about-slogan-text { color: #fff; transform: scale(1.03); }
-.slogan-focus-mode .internal-sidebar, .slogan-focus-mode .about-body, .slogan-focus-mode .home-back-btn, .slogan-focus-mode .about-audio-widget-inpage, .slogan-focus-mode .about-date, .slogan-focus-mode .about-question { opacity: 0 !important; pointer-events: none; }
-
 @keyframes hintAppear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* [추가] 페이지 전환 페이드 인 효과 */
 .view-fade-in { animation: fadeIn 0.8s ease-in-out forwards; }
+
+/* --- 📱 MOBILE RESPONSIVE (아이폰/모바일 최적화) --- */
+@media (max-width: 800px) {
+  /* 홈 화면 그리드 스케일 조정 */
+  .main-grid-wrapper { transform: scale(0.6); transform-origin: center center; }
+  
+  /* 내부 레이아웃: 사이드바를 상단 바로 전환 */
+  .internal-layout { flex-direction: column; }
+  .internal-sidebar { 
+    width: 100%; height: 70px; padding: 0; 
+    justify-content: center; position: fixed; top: 0; border-bottom: 0.5px solid #eee;
+  }
+  .sidebar-group { flex-direction: row; align-items: center; gap: 15px; }
+  .sidebar-comma { display: none; }
+  .sidebar-nav { flex-direction: row; gap: 15px; }
+  .sidebar-nav button, .sidebar-title { font-size: 12px; }
+
+  /* 메인 콘텐츠 영역 가득 채우기 */
+  .internal-main { width: 100%; margin-left: 0; padding-top: 70px; }
+  .internal-section { padding: 40px 15px; min-height: auto; }
+
+  /* 요소 너비 유동적으로 조절 */
+  .everything-frame, .experience-img-frame, .episode-vertical-list, .episode-footer-text { width: 95%; }
+  .video-box-large { 
+    width: 90vw; height: calc(90vw * 0.8); /* 모바일에서는 그리드 사이즈보다 화면 너비 우선 */
+  }
+  .internal-home-video-row { flex-direction: column; align-items: center; gap: 30px; margin-bottom: 60px; }
+
+  /* 텍스트 크기 미세 조정 */
+  .main-slogan { font-size: 18px; }
+  .about-editorial-wrap { padding: 0 10px; }
+  .about-question { font-size: 18px; line-height: 1.4; }
+  .about-body { font-size: 12px; line-height: 2; }
+  .about-audio-widget-inpage { width: 100%; margin-bottom: 60px; }
+  .episode-footer-text .footer-small { font-size: 8pt; white-space: normal; } /* 모바일은 줄바꿈 허용 */
+
+  .home-back-btn { right: 20px; bottom: 20px; width: 40px; height: 40px; }
+  .footer-layout { bottom: 40px; }
+}
