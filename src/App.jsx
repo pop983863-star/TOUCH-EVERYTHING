@@ -39,6 +39,7 @@ function App() {
   const [isZooming, setIsZooming] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null); 
   const [isSloganHovered, setIsSloganHovered] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
 
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
@@ -48,7 +49,6 @@ function App() {
   const inputRef = useRef(null);
   const inputTimeout = useRef(null);
 
-  const emptyRef = useRef(null);
   const overviewRef = useRef(null);
   const everythingRef = useRef(null);
   const aboutRef = useRef(null);
@@ -79,21 +79,15 @@ function App() {
     }
   };
 
-  const handleHomeInteraction = (val) => {
-    setInputText(val);
-    lastInteractionTime.current = Date.now();
-    if (mode === 'static' && val.trim() !== '') setMode('interactive');
-    if (inputTimeout.current) clearTimeout(inputTimeout.current);
-    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
-  };
-
   const moveLogos = useCallback(() => {
+    setIsShuffling(true);
     setActiveIndices(() => {
       let first = Math.floor(Math.random() * TOTAL_NODES);
       let second = Math.floor(Math.random() * TOTAL_NODES);
       while (second === first) second = Math.floor(Math.random() * TOTAL_NODES);
       return [first, second];
     });
+    setTimeout(() => setIsShuffling(false), 800);
   }, []);
 
   useEffect(() => {
@@ -102,6 +96,14 @@ function App() {
     }, 10000);
     return () => clearInterval(shuffleInterval);
   }, [view, moveLogos]);
+
+  const handleHomeInteraction = (val) => {
+    setInputText(val);
+    lastInteractionTime.current = Date.now();
+    if (mode === 'static' && val.trim() !== '') setMode('interactive');
+    if (inputTimeout.current) clearTimeout(inputTimeout.current);
+    inputTimeout.current = setTimeout(() => { if (val.trim() !== '') fetchNewImage(val); }, 600);
+  };
 
   const drawHalftone = useCallback(async () => {
     if (view !== 'internal' || !canvasRef.current || !currentBgImage) return;
@@ -142,6 +144,7 @@ function App() {
       else if (aboutRef.current && scrollPos >= aboutRef.current.offsetTop) setActiveSection('about');
       else if (everythingRef.current && scrollPos >= everythingRef.current.offsetTop) setActiveSection('everything');
       else setActiveSection('overview');
+      subPageActivityTime.current = Date.now();
     };
     const container = scrollContainerRef.current;
     container.addEventListener('scroll', handleScroll);
@@ -154,8 +157,8 @@ function App() {
       if (view === 'home' && !isFocused) {
         const diff = (now - lastInteractionTime.current) / 1000;
         if (mode === 'interactive' && diff >= 12) { setMode('static'); setInputText(''); }
-        else if (mode === 'static' && diff >= 25 && diff < 55) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage('minimal'); } }
-        else if (mode === 'slideshow' && diff >= 55) { setMode('static'); setActiveIndices(INITIAL_LOGO_INDICES); lastInteractionTime.current = Date.now(); }
+        else if (mode === 'static' && diff >= 10 && diff < 40) { if (mode !== 'slideshow') { setMode('slideshow'); fetchNewImage('minimal'); } }
+        else if (mode === 'slideshow' && diff >= 40) { setMode('static'); lastInteractionTime.current = Date.now(); }
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -178,7 +181,7 @@ function App() {
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
                 ))}
                 {activeIndices.map((idx, i) => (
-                  <div key={i} className="logo-overlay-marker" style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}>
+                  <div key={i} className={`logo-overlay-marker clickable ${isShuffling ? 'shuffling' : ''}`} style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}>
                     <img src="/assets/logo-reference.png" alt="Logo" />
                   </div>
                 ))}
@@ -216,8 +219,7 @@ function App() {
           </aside>
 
           <main className="internal-main" ref={scrollContainerRef}>
-            {/* 쉼표(,) 섹션: 1.5배 커진 영상과 슬로건 */}
-            <section className="internal-section" ref={overviewRef}>
+            <section className="internal-section section-overview" ref={overviewRef}>
               <div className="internal-home-video-row scaled-row">
                 <div className="video-box-large"><video autoPlay loop muted playsInline className="brand-video"><source src="/assets/logo-system.mp4" type="video/mp4" /></video></div>
                 <div className="video-box-large"><video autoPlay loop muted playsInline className="brand-video"><source src="/assets/logo-loop.mp4" type="video/mp4" /></video></div>
