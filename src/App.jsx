@@ -144,7 +144,6 @@ function App() {
       else if (aboutRef.current && scrollPos >= aboutRef.current.offsetTop) setActiveSection('about');
       else if (everythingRef.current && scrollPos >= everythingRef.current.offsetTop) setActiveSection('everything');
       else setActiveSection('overview');
-      subPageActivityTime.current = Date.now();
     };
     const container = scrollContainerRef.current;
     container.addEventListener('scroll', handleScroll);
@@ -181,7 +180,7 @@ function App() {
                   <div key={n.id} className="mask-circle" style={{ left: n.x, top: n.y, backgroundImage: currentBgImage ? `url(${currentBgImage})` : 'none', backgroundPosition: `-${n.x}px -${n.y}px`, backgroundSize: '496px 396px' }} />
                 ))}
                 {activeIndices.map((idx, i) => (
-                  <div key={i} className={`logo-overlay-marker clickable ${isShuffling ? 'shuffling' : ''}`} style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}>
+                  <div key={i} className={`logo-overlay-marker ${isShuffling ? 'shuffling' : ''}`} style={{ transform: `translate(${nodes[idx].x}px, ${nodes[idx].y}px)` }}>
                     <img src="/assets/logo-reference.png" alt="Logo" />
                   </div>
                 ))}
@@ -190,6 +189,8 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
+              {/* [수정] 힌트 문구를 입력창 위로 배치 */}
+              {(mode !== 'static' || inputText) && <div className="footer-hint-above">TOUCH SYMBOL</div>}
               <div className={`dynamic-input-area ${inputText ? 'is-active' : ''}`} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }}>
                 <span className="touch-text">TOUCH</span><span className="comma-text">,</span>
                 <div className="input-field-wrapper">
@@ -197,7 +198,6 @@ function App() {
                   <span className="input-measure">{inputText}</span>
                 </div>
               </div>
-              {(mode !== 'static' || inputText) && <div className="footer-hint-centered">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -241,9 +241,17 @@ function App() {
                     setSelectedColor(hex.toUpperCase()); setIsZooming(true);
                     fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
                   }} />
-                  <div className="halftone-controls-outer"><div className="halftone-box"><span>DENSITY</span><input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} /></div></div>
+                  {/* [수정] 덴시티 바를 하얀 박스 내부로 삽입 */}
+                  <div className="halftone-controls-outer">
+                    <div className="halftone-box">
+                      <span>DENSITY</span>
+                      <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
+                    </div>
+                  </div>
                 </div>
-                <div className="everything-zoom-hint-inline">{selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span>CLICK ANYWHERE TO EXPLORE COLOR</span>}</div>
+                <div className="everything-zoom-hint-inline">
+                  {selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span>CLICK ANYWHERE TO EXPLORE COLOR</span>}
+                </div>
               </div>
             </section>
 
