@@ -28,7 +28,7 @@ const generateGridNodes = () => {
 
 function App() {
   const [view, setView] = useState('home'); 
-  const [activeSection, setActiveSection] = useState('overview'); 
+  const [activeSection, setActiveSection] = useState('empty'); 
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [nodes] = useState(generateGridNodes());
@@ -48,6 +48,7 @@ function App() {
   const inputRef = useRef(null);
   const inputTimeout = useRef(null);
 
+  const emptyRef = useRef(null);
   const overviewRef = useRef(null);
   const everythingRef = useRef(null);
   const aboutRef = useRef(null);
@@ -195,7 +196,8 @@ function App() {
                   <span className="input-measure">{inputText}</span>
                 </div>
               </div>
-              {(mode !== 'static' || inputText) && <div className="footer-hint-centered">TOUCH SYMBOL</div>}
+              {/* [수정] 힌트 문구를 인풋 바로 아래로 고정 */}
+              {(mode !== 'static' || inputText) && <div className="footer-hint-below">TOUCH SYMBOL</div>}
             </div>
           </footer>
         </div>
@@ -239,7 +241,12 @@ function App() {
                     setSelectedColor(hex.toUpperCase()); setIsZooming(true);
                     fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
                   }} />
-                  <div className="halftone-controls-outer"><div className="halftone-box"><span>DENSITY</span><input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} /></div></div>
+                  <div className="halftone-controls-outer">
+                    <div className="halftone-box">
+                      <span>DENSITY</span>
+                      <input type="range" min="1" max="60" value={dotSize} onChange={e => setDotSize(parseInt(e.target.value))} />
+                    </div>
+                  </div>
                 </div>
                 <div className="everything-zoom-hint-inline">{selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span>CLICK ANYWHERE TO EXPLORE COLOR</span>}</div>
               </div>
@@ -258,13 +265,7 @@ function App() {
                   쉽게 지나치는 순간에 주목하고, 감각적 경험을 통해<br/>
                   새로운 라이프스타일을 제안한다.
                 </p>
-                <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`} 
-                  onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}
-                  onTouchStart={() => setIsSloganHovered(true)} onTouchEnd={() => setIsSloganHovered(false)}
-                >
-                  지나친 모든 것에 다시 관심을 기울일 때,<br/>
-                  평범한 일상은 새로운 발견이 된다.
-                </div>
+                <div className={`about-slogan-text ${isSloganHovered ? 'hovered' : ''}`} onMouseEnter={() => setIsSloganHovered(true)} onMouseLeave={() => setIsSloganHovered(false)}>지나친 모든 것에 다시 관심을 기울일 때,<br/>평범한 일상은 새로운 발견이 된다.</div>
                 <div className="about-audio-widget-inpage"><iframe width="100%" height="120" src="https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&light=1&feed=%2Fthomyorke_%2Fin-the-absence-thereof-2%2F" frameBorder="0"></iframe></div>
               </div>
             </section>
@@ -288,9 +289,7 @@ function App() {
               </div>
             </section>
           </main>
-          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); setInputText(''); }}>
-            <img src="/assets/logo-reference.png" alt="Home" />
-          </div>
+          <div className="home-back-btn" onClick={() => { setView('home'); setMode('static'); setInputText(''); }}><img src="/assets/logo-reference.png" alt="Home" /></div>
         </div>
       )}
     </div>
