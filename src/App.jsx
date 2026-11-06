@@ -28,7 +28,6 @@ const generateGridNodes = () => {
 
 function App() {
   const [view, setView] = useState('home'); 
-  const [activeSection, setActiveSection] = useState('overview'); 
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [nodes] = useState(generateGridNodes());
@@ -44,11 +43,10 @@ function App() {
   const canvasRef = useRef(null);
   const imageBuffer = useRef(null);
   const lastInteractionTime = useRef(Date.now()); 
-  const subPageActivityTime = useRef(Date.now()); 
-  const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
   const inputTimeout = useRef(null);
 
+  // 섹션 참조용 Refs
   const overviewRef = useRef(null);
   const everythingRef = useRef(null);
   const aboutRef = useRef(null);
@@ -136,21 +134,6 @@ function App() {
   useEffect(() => { if (view === 'internal') drawHalftone(); }, [drawHalftone, view, currentBgImage, dotSize]);
 
   useEffect(() => {
-    if (view !== 'internal') return;
-    const handleScroll = () => {
-      const scrollPos = scrollContainerRef.current.scrollTop + window.innerHeight / 2;
-      if (episodeRef.current && scrollPos >= episodeRef.current.offsetTop) setActiveSection('episode');
-      else if (experienceRef.current && scrollPos >= experienceRef.current.offsetTop) setActiveSection('experience');
-      else if (aboutRef.current && scrollPos >= aboutRef.current.offsetTop) setActiveSection('about');
-      else if (everythingRef.current && scrollPos >= everythingRef.current.offsetTop) setActiveSection('everything');
-      else setActiveSection('overview');
-    };
-    const container = scrollContainerRef.current;
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [view]);
-
-  useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
       if (view === 'home' && !isFocused) {
@@ -189,7 +172,7 @@ function App() {
           </div>
           <footer className="footer-layout">
             <div className="footer-container">
-              {/* [수정] 힌트 문구를 입력창 위로 배치 */}
+              {/* [수정] 힌트 문구 위치 상단으로 고정 */}
               {(mode !== 'static' || inputText) && <div className="footer-hint-above">TOUCH SYMBOL</div>}
               <div className={`dynamic-input-area ${inputText ? 'is-active' : ''}`} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }}>
                 <span className="touch-text">TOUCH</span><span className="comma-text">,</span>
@@ -204,22 +187,19 @@ function App() {
       )}
 
       {view === 'internal' && (
-        <div className="internal-layout">
-          <aside className="internal-sidebar">
-            <div className="sidebar-group">
-              <div className="sidebar-title" onClick={() => setView('home')}>TOUCH</div>
-              <div className={`sidebar-comma ${activeSection !== 'overview' ? 'active' : ''}`}>,</div>
-              <nav className="sidebar-nav">
-                <button className={activeSection === 'everything' ? 'active' : ''} onClick={() => scrollTo(everythingRef)}>EVERYTHING</button>
-                <button className={activeSection === 'about' ? 'active' : ''} onClick={() => scrollTo(aboutRef)}>ABOUT</button>
-                <button className={activeSection === 'experience' ? 'active' : ''} onClick={() => scrollTo(experienceRef)}>THE EXPERIENCE</button>
-                <button className={activeSection === 'episode' ? 'active' : ''} onClick={() => scrollTo(episodeRef)}>EPISODE</button>
-              </nav>
-            </div>
-          </aside>
+        <div className="internal-full-scroll">
+          {/* [복구] 상단 중앙 인덱스 메뉴 */}
+          <nav className="internal-top-nav">
+             <button onClick={() => setView('home')}>TOUCH ,</button>
+             <button onClick={() => scrollTo(everythingRef)}>EVERYTHING</button>
+             <button onClick={() => scrollTo(aboutRef)}>ABOUT</button>
+             <button onClick={() => scrollTo(experienceRef)}>THE EXPERIENCE</button>
+             <button onClick={() => scrollTo(episodeRef)}>EPISODE</button>
+          </nav>
 
-          <main className="internal-main" ref={scrollContainerRef}>
-            <section className="internal-section section-overview" ref={overviewRef}>
+          <main className="internal-scroll-area">
+            {/* 섹션 0: 로고 영상 2개 + 슬로건 */}
+            <section className="internal-section" ref={overviewRef}>
               <div className="internal-home-video-row scaled-row">
                 <div className="video-box-large"><video autoPlay loop muted playsInline className="brand-video"><source src="/assets/logo-system.mp4" type="video/mp4" /></video></div>
                 <div className="video-box-large"><video autoPlay loop muted playsInline className="brand-video"><source src="/assets/logo-loop.mp4" type="video/mp4" /></video></div>
@@ -227,6 +207,7 @@ function App() {
               <h1 className="main-slogan">REDISCOVER THE ORDINARY</h1>
             </section>
 
+            {/* 섹션 1: EVERYTHING */}
             <section className="internal-section" ref={everythingRef}>
               <div className="everything-frame">
                 <div className={`page-everything ${isZooming ? 'zooming' : ''}`}>
@@ -241,7 +222,7 @@ function App() {
                     setSelectedColor(hex.toUpperCase()); setIsZooming(true);
                     fetchNewImage(inputText, hex).then(() => { setTimeout(() => { setIsZooming(false); setSelectedColor(null); }, 2000); });
                   }} />
-                  {/* [수정] 덴시티 바를 하얀 박스 내부로 삽입 */}
+                  {/* [수정] 박스 안에 슬라이더 통합 */}
                   <div className="halftone-controls-outer">
                     <div className="halftone-box">
                       <span>DENSITY</span>
@@ -249,12 +230,14 @@ function App() {
                     </div>
                   </div>
                 </div>
-                <div className="everything-zoom-hint-inline">
+                {/* [수정] 8pt 컬러 힌트 문구 */}
+                <div className="everything-zoom-hint-inline-small">
                   {selectedColor ? <span style={{ color: selectedColor, fontWeight: '700' }}>ZOOMING INTO {selectedColor}</span> : <span>CLICK ANYWHERE TO EXPLORE COLOR</span>}
                 </div>
               </div>
             </section>
 
+            {/* 섹션 2: ABOUT */}
             <section className="internal-section" ref={aboutRef}>
               <div className="about-editorial-wrap">
                 <p className="about-date">2026년 6월 12일, 맑음</p>
@@ -273,11 +256,13 @@ function App() {
               </div>
             </section>
 
+            {/* 섹션 3: THE EXPERIENCE */}
             <section className="internal-section" ref={experienceRef}>
                <div className="experience-img-frame"><img src="/assets/ex.png" alt="Experience" /></div>
             </section>
 
-            <section className="internal-section section-episode" ref={episodeRef}>
+            {/* 섹션 4: EPISODE */}
+            <section className="internal-section" ref={episodeRef}>
               <div className="episode-vertical-list">
                 {EPISODE_DATA.map(item => (
                   <div key={item.id} className="episode-item-original">
